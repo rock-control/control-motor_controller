@@ -17,13 +17,13 @@ LINK_DIRECTORIES(${BASE_TYPES_LIBRARY_DIRS})
 INCLUDE_DIRECTORIES(/usr/include/eigen2)
 
 ADD_LIBRARY(motor_controller SHARED 
-	    PIV.cpp
-	    RK4_Integrator.cpp
-	    SimpleIntegrator.cpp
+	    piv.cpp
+	    rk4_integrator.cpp
+	    simpleintegrator.cpp
 	    ramp.cpp
-	    PIV.hpp
-	    RK4_Integrator.hpp
-	    SimpleIntegrator.hpp)
+	    piv.hpp
+	    rk4_integrator.hpp
+	    simpleintegrator.hpp)
 #TARGET_LINK_LIBRARIES(xsens xsensVendorLib) 
 #${DFKI_TYPES_LIBS})
 
@@ -40,9 +40,9 @@ INSTALL(TARGETS motor_controller
     LIBRARY DESTINATION lib)
 INSTALL(FILES  
 	ramp.h
-       	PIV.hpp
-        RK4_Integrator.hpp
-        SimpleIntegrator.hpp
+       	piv.hpp
+        rk4_integrator.hpp
+        simpleintegrator.hpp
 	DESTINATION include)
 
 CONFIGURE_FILE(motor_controller.pc.in motor_controller.pc @ONLY)

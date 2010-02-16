@@ -9,7 +9,7 @@
 // Copyright: See COPYING file that comes with this distribution
 //
 //
-#include "PIV.hpp"
+#include "piv.hpp"
 #include <iostream>
 
 namespace controller
