@@ -25,14 +25,6 @@ ADD_LIBRARY(motor_controller SHARED
 	    PIV.hpp
 	    RK4Integrator.hpp
 	    SimpleIntegrator.hpp)
-#TARGET_LINK_LIBRARIES(xsens xsensVendorLib) 
-#${DFKI_TYPES_LIBS})
-
-#need to link to some other libraries ? just add them here
-#TARGET_LINK_LIBRARIES(driver png jpeg)
-
-#ADD_EXECUTABLE(TrajectoryFollowerTest TrajectoryFollowerTest.cpp)
-#TARGET_LINK_LIBRARIES(TrajectoryFollowerTest motor_controller)
  
 CONFIGURE_FILE(Doxyfile.in Doxyfile @ONLY)
 ADD_CUSTOM_TARGET(doc doxygen Doxyfile)
