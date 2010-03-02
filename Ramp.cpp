@@ -42,13 +42,18 @@ Ramp::Ramp (double initial_data, double final_data, double delta_time, int type)
 
 double Ramp::getVal(double time)
 {
-    if(!isActive() && bReset) 
+    if(!bReset)
+    {
+	return final_data;
+    }
+
+    if(!isActive()) 
     {
 	start_time = time;
 	active = true;
 	return initial_data;
     }
-
+    
     if(time < start_time + delta_time &&  delta_time!=0.0)
     {
 	if(type == LINEAR)
