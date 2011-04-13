@@ -30,6 +30,10 @@
 #include <math.h>
 #include <iostream>
 
+bool zeroCrossing(double currValue, double prevValue, double refValue);
+bool positiveZeroCrossing(double currValue, double prevValue, double refValue);
+bool negativeZeroCrossing(double currValue, double prevValue, double refValue);
+
 namespace motor_controller
 {
     class PID
@@ -158,6 +162,62 @@ namespace motor_controller
 	    double ultimateGain;  // Gain for computation of parameters
     };
 
+    // Extracts the step response properties:
+    // 		rise time, 
+    // 		settling time, 
+    // 		percentage overshoot 
+    // 		steady state error and
+    // 		squared error
+    class PIDStepResponseProperties
+    {
+	public:
+	    PIDStepResponseProperties() { reset(); };
+	    PIDStepResponseProperties(double _Ts,
+		    double _riseTimeFractionReference = 1.0,
+		    double _settlingTimeFractionReference = 0.05);
+
+	    void setCoefficients(double _Ts,
+		    double _riseTimeFractionReference = 1.0,
+		    double _settlingTimeFractionReference = 0.05);
+
+	    void reset();
+
+	    void update(double _actualOutput,
+		    double _refInput);
+
+	    void getProperties(double &_riseTimeSec,
+		    double &_settlingTimeSec,
+		    double &_percentOvershoot,
+		    double &_steadyStateError);
+
+	    void printProperties();
+
+	private:
+	    double Ts;
+
+	    double riseTimeSec;  // Rise time is seconds
+	    double settlingTimeSec; // Settling time in seconds
+	    double percentOvershoot; // Percentage Overshoot
+	    double steadyStateError; // Steady state error 
+
+	    double riseTimeFractionReference; // Measures the rise time to the fraction of reference value 
+	    double settlingTimeFractionReference; // Measure the settling time limit within the fraction of reference value
+	    double steadyStateTimeLimitSec;
+
+	    bool firstRun;
+	    double prevOutput;
+	    double currTime; // Current time in seconds
+
+	    bool riseTimeDetected;
+
+	    bool secondZeroCrossing;
+	    bool firstZeroCrossing;
+	    double maxAmplitude;
+
+	    double squaredError;
+
+
+    };
 }
 
 #endif
