@@ -40,6 +40,14 @@ bool negativeZeroCrossing(double currValue, double prevValue, double refValue = 
 
 namespace motor_controller
 {
+    //structure to hold all controller parameters 
+    //for a description of the parameters see below
+    struct PIDSettings
+    {   
+        double Ts,K,Ti,Td,N,B,Tt,YMin,YMax;
+        PIDSettings():Ts(0),K(0),Ti(0),Td(0),N(0),B(1),Tt(0),YMin(0),YMax(0){};
+    };
+
     class PID
     {
 	public:
