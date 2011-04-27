@@ -41,34 +41,26 @@ negativeZeroCrossing(double currValue, double prevValue, double refValue)
 
 PID::PID()
 { 
-    bIntegral = true;
-    bDerivative = true;
-    bDerivativeFiltering = true;	
-
     initialized = false; 
-    firstRun = true;
 };
 
-PID::PID (double _Ts, 
-		    double _K,
-		    double _Ti, 
-		    double _Td, 
-		    double _N,
-		    double _B, 
-		    double _Tt,
-		    double _YMin, 
-		    double _YMax)
+	void 
+PID::setParallelCoefficients(double _Ts,
+	double _Kp,
+	double _Ki,
+	double _Kd, 
+	double _N,
+	double _B, 
+	double _Tt,
+	double _YMin, 
+	double _YMax)
 {
-    bIntegral = true;
-    bDerivative = true;
-    bDerivativeFiltering = true;	
-
-    setCoefficients(_K, _Ti, _Td, _N, _Ts, _B, _Tt, _YMin, _YMax);
-    firstRun = true;
+    setIdealCoefficients(_Ts, _Kp, 1.0/_Ki/_Kp, _Kd/_Kp,
+	    _N, _B, _Tt, _YMin, _YMax);
 }
 
 	void 
-PID::setCoefficients (double _Ts, 
+PID::setIdealCoefficients (double _Ts, 
 		    double _K,
 		    double _Ti, 
 		    double _Td, 
@@ -78,6 +70,8 @@ PID::setCoefficients (double _Ts,
 		    double _YMin, 
 		    double _YMax)
 {
+    firstRun = true;
+
     if(initialized)
     {
 	Kold = K;
@@ -99,6 +93,21 @@ PID::setCoefficients (double _Ts,
     YMin = _YMin;
     YMax = _YMax;
 
+    if(Ti == 0.0 || isnan(Ti) || isinf(Ti) )   // turns off integral controller
+	bIntegral = false;
+    else
+	bIntegral = true;
+
+    if(Td == 0.0)         // turns off derivative term
+	bDerivative = false;
+    else
+	bDerivative = true;
+
+    if(N == 0.0)          // turns off derviative filtering
+	bDerivativeFiltering = false;	
+    else
+	bDerivativeFiltering = true;
+
     computeCoefficients();
 }
 
@@ -115,8 +124,66 @@ PID::saturate ( double _val )
 	return _val;
 }
 
+	void 
+PID::computeCoefficients()
+{
+    Bi = Ao = Ad = Bd = 0.0;
+    if(bIntegral)
+    {
+	Bi = K*Ts/Ti; // integral gain
+	if(Tt == 0 && Td != 0.0) // if Tt is zero and Td nonzero take the ideal value
+	    Tt = sqrt(Ti*Td);  // approximate ideal value
+	
+	if(Tt > 0.0)
+	    Ao = Ts/Tt;  // anti-windup
+	else 
+	    Ao = 0.0;
+    }
+
+    if(bDerivative)
+    {
+	if(bDerivativeFiltering)
+	{
+	    Ad = Td/(Td+N*Ts);
+	    Bd = K*N*Ad; //derivative gain
+	}
+	else
+	{
+	    Bd = K*Td/Ts; //derivative gain
+	}
+    }
+
+    P = I = D = 0.0;
+    initialized = true;
+
+   /* 
+    cout << "PID PARAMETERS" << endl;
+    cout << " Interacting type parameters " << endl
+         << "   Kp = " << K 
+         << ",  Ti = " << Ti
+         << ",  Td = " << Td << endl; 
+
+    cout << " Parallel type parameters " << endl
+    cout << setiosflags(ios::scientific) 
+	 << setw(10)
+	 << setprecision(5)
+	 << "Kp = " << K 
+         << ", Ki = " << 1.0 / Ti / K
+         << ", Kd = " << Td * K << " >>> " ;
+
+    cout << " Anti-integrator windup gain = " << Tt << endl; 
+    cout << " Derivative smoothing factor (N) = " << N << endl; 
+
+    cout << " Internal terms " << endl 
+	 << "   Integral Gain = " << Bi 
+	 << ",  Anti-windup Gain = " << Ao 
+	 << ",  Derivative Gains = " << Ad << "," << Bd << endl << endl;
+
+    */
+}
+
 	double 
-PID::update ( double _measuredValue, double _referenceValue  )
+PID::update ( double _measuredValue, double _referenceValue, double time  )
 {
     if(firstRun)
     {
@@ -124,7 +191,7 @@ PID::update ( double _measuredValue, double _referenceValue  )
 	prevValue = _measuredValue;
     }
 
-    if(Kold != K || Bold != B)
+    if( (Kold != K || Bold != B) && bIntegral)
     {
 	// for bumpless motion on parameter change
 	I = I + Kold*(Bold * _referenceValue - _measuredValue)
@@ -143,57 +210,20 @@ PID::update ( double _measuredValue, double _referenceValue  )
 
     prevValue = _measuredValue; //update old process output
 
-/*    cout 
-	<< "  y " << _measuredValue
+    /*
+    cout 
+	<< " t " << time 
+	<< ", y " << _measuredValue
 	<< ", ysp " << _referenceValue
 	<< ", err " << _referenceValue - _measuredValue
 	<< ", P " << P 
-	<< ", Ti " << Ti
 	<< ", I " << I 
 	<< ", D " << D 
 	<< ", rC " << rawCommand 
 	<< ", sC " << saturatedCommand << endl;
-*/
+*/	
+
     return saturatedCommand;
-}
-
-	void 
-PID::computeCoefficients()
-{
-    if(Tt == 0.0)
-	Tt = sqrt(Ti*Td);  // approximate ideal value
-
-    if(Ti == 0.0 || isnan(Ti) || isinf(Ti) )	   // turns off integral controller
-	bIntegral = false;
-
-    if(Td == 0.0)         // turns off derivative term
-	bDerivative = false;
-
-    if(N == 0.0)          // turns off derviative filtering
-	bDerivativeFiltering = false;	
-
-    Bi = Ao = Ad = Bd = 0.0;
-    if(bIntegral)
-    {
-	Bi = K*Ts/Ti; // integral gain
-	Ao = Ts/Tt;  // anti-windup
-    }
-
-    if(bDerivative)
-    {
-	if(bDerivativeFiltering)
-	{
-	    Ad = Td/(Td+N*Ts);
-	    Bd = K*N*Ad; //derivative gain
-	}
-	else
-	{
-	    Bd = K*Td/Ts; //derivative gain
-	}
-    }
-
-    P = I = D = 0.0;
-    initialized = true;
 }
 
 	void 
@@ -214,8 +244,7 @@ PID::enableIntegral()
 PID::enableIntegral(double _Ti)  
 { 
     Ti = _Ti; 
-    bIntegral = true; 
-    computeCoefficients();
+    enableIntegral();
 } 
 
 	void 
@@ -236,8 +265,7 @@ PID::enableDerivative()
 PID::enableDerivative(double _Td)  
 { 
     Td = _Td; 
-    bDerivative = true; 
-    computeCoefficients();
+    enableDerivative();
 } 
 
 	void 
@@ -258,9 +286,13 @@ PID::enableDerivativeFiltering()
 PID::enableDerivativeFiltering(double _N)  
 { 
     N = _N; 
-    bDerivativeFiltering = true; 
-    computeCoefficients();
+    enableDerivativeFiltering();
 } 
+
+
+
+
+
 
 PIDAutoTuning::PIDAutoTuning()
 {
@@ -411,13 +443,16 @@ PIDStepResponseProperties::reset()
     currTime = 0.0;
     squaredError = 0.0;
     riseTimeDetected = false;
-    secondZeroCrossing = false;
     firstZeroCrossing = false;
+    steadyStateErrorTimeSec = 0.0;
 
     riseTimeSec = 0.0;
     settlingTimeSec = 0.0;
     percentOvershoot = 0.0;
     steadyStateError = 0.0;
+
+    maxAmplitudes.clear();
+    maxAmplitude = 0.0;
 }
 
 	void 
@@ -433,20 +468,13 @@ PIDStepResponseProperties::update(double _actualOutput,
     }
     currTime += Ts;
 
-    // Detects the first zero crossing 
-    if(!firstZeroCrossing 
-	    && positiveZeroCrossing(_actualOutput, prevOutput, _refInput))
-	    firstZeroCrossing = true;
-
-    // Detects the second zero crossing 
-    if(firstZeroCrossing 
-	    && negativeZeroCrossing(_actualOutput, prevOutput, _refInput))
-	secondZeroCrossing = true;
-
     // RISE TIME DETECTION
     if(!riseTimeDetected 
 	    && positiveZeroCrossing(_actualOutput, prevOutput, riseTimeFractionReference * _refInput) )
     {
+	cout << " Rise Time Detected " 
+	     << _actualOutput << " " 
+	     << prevOutput << endl;
 	riseTimeSec = currTime;
 	riseTimeDetected = true;
     }
@@ -454,12 +482,24 @@ PIDStepResponseProperties::update(double _actualOutput,
     // OVERSHOOT DETECTION
     // stores the maximum amplitude after first zero crossing 
     // and before the second zero crossing
-    if(firstZeroCrossing 
-	    &&  !secondZeroCrossing
-	    && _actualOutput > maxAmplitude)
+    if(positiveZeroCrossing(_actualOutput, prevOutput, _refInput))
     {
-	maxAmplitude = _actualOutput;
-	percentOvershoot = (maxAmplitude - _refInput) / _refInput * 100.0;
+	if(!firstZeroCrossing)
+	{
+	    firstZeroCrossing = true;
+	}
+	else 
+	{
+	    maxAmplitudes.push_back(maxAmplitude);
+	    maxAmplitude = 0.0;
+	}
+    }
+
+    if(firstZeroCrossing && (_actualOutput - _refInput) > maxAmplitude)
+    {
+	maxAmplitude = _actualOutput - _refInput;
+	if(maxAmplitudes.empty())
+	    percentOvershoot = 100.0 * maxAmplitude /_refInput;
     }
 
     // SETTLING TIME
@@ -468,6 +508,8 @@ PIDStepResponseProperties::update(double _actualOutput,
 
     // STEADY STATE ERROR
     steadyStateError = (_actualOutput - _refInput);
+    if(prevOutput == _actualOutput)
+	steadyStateErrorTimeSec += Ts;
     
     // SQUARED ERROR
     squaredError += fabs(_actualOutput - _refInput) * 
@@ -491,10 +533,38 @@ PIDStepResponseProperties::getProperties(double &_riseTimeSec,
 	void 
 PIDStepResponseProperties::printProperties()
 {
-    cout << " Rise time: " << riseTimeSec 
-	 << "s, Percentage overshoot: " << percentOvershoot  
-	 << "%, Settling time: " << settlingTimeSec  
-	 << "s, Steady state error: " << steadyStateError
-	 << "s, Squared error: " << squaredError << endl;
+/*    cout << "\nSTEP RESPONSE PROPERTIES " << endl;
+    cout << ">>>>>>>>>>>>>>>>>>>>>>>>>" << endl;
+    cout << "Total time: " << currTime  << "s" << endl;
+    if(!riseTimeDetected)
+	cout << " Output did not reach the rise time target !!!" << endl;
+    else 
+	cout << "Rise time: " << riseTimeSec << "s" << endl;
+
+    if(!firstZeroCrossing)
+	cout << " Output did not reach the target !!!" << endl;
+    else
+    {
+	cout << "Percentage overshoot: " << percentOvershoot << "%" << endl;  
+	cout << "Amplitudes: " ;
+	for(std::vector<double>::iterator i = maxAmplitudes.begin(); i < maxAmplitudes.end(); i++)
+	    cout << "[" << *i << "]";
+	cout << endl;
+    }
+
+    cout << "Settling time: " << settlingTimeSec << "s" << endl; 
+    cout << "Steady state error: " << steadyStateError 
+	 << " for the last "  << steadyStateErrorTimeSec << " seconds" << endl; 
+
+    cout << "Squared error: " << squaredError << endl;
+    cout << "<<<<<<<<<<<<<<<<<<<<<<<<<" << endl;
+    */
+    cout << setiosflags(ios::scientific) 
+	 << setw(10)
+	 << setprecision(5)
+	 << "Rt = " << riseTimeSec
+	 << ", Ov = " << percentOvershoot  
+	 << ", Ts = " << settlingTimeSec 
+	 << ", Ess = " << steadyStateError << endl; 
 }
 

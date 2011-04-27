@@ -2,12 +2,13 @@
 // C++ Interface: PID 
 //
 // Description: Implementation based on "Control System Design" by Karl Johan Åström 
-// implements 'interacting type' PID with  
+// implements 'IDEAL TYPE' PID with  
 //    -	anti-integrator windup 
 //    -	derivative filtering
 //    -	setpoint weighing
 //    -	bumpless parameter change
 //    - 'Backward difference' approximation of parameters
+//    - uses the output derivative instead of error derivative
 //
 //                       1    
 // output = K*( e(t) + (----)*e(t) + Td*s*y(t))
@@ -17,9 +18,10 @@
 //GUIDELINES :
 //   - for Derivative action
 //   		1/Ts >> N/Td 
-//   		(Rule of thumb, hN/Td ~ 0.2 to 0.6)
-//    
+//   		(Rule of thumb, TsN/Td ~ 0.2 to 0.6)
 //
+//
+//USING THE PID 
 //
 //
 // Author:  <Ajish Babu>, (C) 2011
@@ -29,10 +31,12 @@
 
 #include <math.h>
 #include <iostream>
+#include <iomanip>
+#include <vector>
 
-bool zeroCrossing(double currValue, double prevValue, double refValue);
-bool positiveZeroCrossing(double currValue, double prevValue, double refValue);
-bool negativeZeroCrossing(double currValue, double prevValue, double refValue);
+bool zeroCrossing(double currValue, double prevValue, double refValue = 0);
+bool positiveZeroCrossing(double currValue, double prevValue, double refValue = 0);
+bool negativeZeroCrossing(double currValue, double prevValue, double refValue = 0);
 
 namespace motor_controller
 {
@@ -40,31 +44,41 @@ namespace motor_controller
     {
 	public:
 	    PID();
-	    PID(double _Ts,
-		    double _K = 0, 
-		    double _Ti = 0, 
-		    double _Td = 0, 
+
+	    /* 
+	     * Sets the coefficients for a parallel type PID
+	     *
+	     * A simple PID usage is
+	     *
+	     *    setParallelCoefficients(Ts, Kp, Ki, Kd) 
+	    */
+	    void setParallelCoefficients(double _Ts,
+		    double _Kp = 0,
+		    double _Ki = 0,
+		    double _Kd = 0, 
 		    double _N = 0,
 		    double _B = 1, 
-		    double _Tt = 0,
+		    double _Tt = -1,
 		    double _YMin = 0, 
 		    double _YMax = 0);
 
-	    void setCoefficients (double _Ts,
+	    void setIdealCoefficients (double _Ts,
 		    double _K = 0 , 
 		    double _Ti = 0, 
 		    double _Td = 0, 
 		    double _N = 0,
 		    double _B = 1, 
-		    double _Tt = 0,
+		    double _Tt = -1,
 		    double _YMin = 0, 
 		    double _YMax = 0);
 
 	    double saturate ( double _val );
-	    double update ( double _measuredValue, double _referenceValue  );
+	    double update ( double _measuredValue, double _referenceValuei, double time = 0.0  );
 
 	    void computeCoefficients();
 
+
+	    // set coefficients before enabling or disabling the compnents below
 	    void disableIntegral(); 
 	    void enableIntegral(); 
 	    void enableIntegral(double _Ti); 
@@ -93,6 +107,11 @@ namespace motor_controller
 		      // b = 1 in-effect disable setpoint weighting
 
 	    double Tt; // Anti-integrator-windup time constant 
+	    	       // < 0 disable
+		       // > 0 sets that value
+		       // = 0 and Td = 0  disable 
+		       // = 0 and Td > 0  Tt = sqrt(Ti * Td) 
+		       
 	    double Ts; // Sampling time
 
 	    double YMax; // Maximum output value
@@ -199,24 +218,20 @@ namespace motor_controller
 	    double settlingTimeSec; // Settling time in seconds
 	    double percentOvershoot; // Percentage Overshoot
 	    double steadyStateError; // Steady state error 
+	    double steadyStateErrorTimeSec;
+	    double squaredError;
+	    std::vector<double> maxAmplitudes;
+	    double maxAmplitude;
 
 	    double riseTimeFractionReference; // Measures the rise time to the fraction of reference value 
 	    double settlingTimeFractionReference; // Measure the settling time limit within the fraction of reference value
-	    double steadyStateTimeLimitSec;
 
 	    bool firstRun;
 	    double prevOutput;
 	    double currTime; // Current time in seconds
 
 	    bool riseTimeDetected;
-
-	    bool secondZeroCrossing;
 	    bool firstZeroCrossing;
-	    double maxAmplitude;
-
-	    double squaredError;
-
-
     };
 }
 
