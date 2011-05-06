@@ -59,6 +59,14 @@ PID::setParallelCoefficients(double _Ts,
 	    _N, _B, _Tt, _YMin, _YMax);
 }
 
+        void 
+PID::setPIDSettings(const PIDSettings &_settings)
+{
+    setIdealCoefficients(_settings.Ts, _settings.K, _settings.Ti,
+                         _settings.Td, _settings.N, _settings.B,
+                         _settings.Tt, _settings.YMin, _settings.YMax);
+}
+
 	void 
 PID::setIdealCoefficients (double _Ts, 
 		    double _K,

@@ -79,6 +79,8 @@ namespace motor_controller
 		    double _Tt = -1,
 		    double _YMin = 0, 
 		    double _YMax = 0);
+            
+            void setPIDSettings(const PIDSettings &_settings);
 
 	    double saturate ( double _val );
 	    double update ( double _measuredValue, double _referenceValue, double time = 0.0  );
