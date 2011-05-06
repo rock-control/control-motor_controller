@@ -81,9 +81,11 @@ namespace motor_controller
 		    double _YMax = 0);
 
 	    double saturate ( double _val );
-	    double update ( double _measuredValue, double _referenceValuei, double time = 0.0  );
+	    double update ( double _measuredValue, double _referenceValue, double time = 0.0  );
+	    void reset();
 
 	    void computeCoefficients();
+	    void printCoefficients();
 
 
 	    // set coefficients before enabling or disabling the compnents below

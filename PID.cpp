@@ -70,8 +70,6 @@ PID::setIdealCoefficients (double _Ts,
 		    double _YMin, 
 		    double _YMax)
 {
-    firstRun = true;
-
     if(initialized)
     {
 	Kold = K;
@@ -153,21 +151,21 @@ PID::computeCoefficients()
 	}
     }
 
-    P = I = D = 0.0;
+    reset();
     initialized = true;
-
-   /* 
+}
+    
+    void
+PID::printCoefficients()
+{
     cout << "PID PARAMETERS" << endl;
-    cout << " Interacting type parameters " << endl
+    cout << " Ideal type parameters " << endl
          << "   Kp = " << K 
          << ",  Ti = " << Ti
          << ",  Td = " << Td << endl; 
 
-    cout << " Parallel type parameters " << endl
-    cout << setiosflags(ios::scientific) 
-	 << setw(10)
-	 << setprecision(5)
-	 << "Kp = " << K 
+    cout << " Parallel type parameters " << endl; 
+    cout << "Kp = " << K 
          << ", Ki = " << 1.0 / Ti / K
          << ", Kd = " << Td * K << " >>> " ;
 
@@ -178,8 +176,6 @@ PID::computeCoefficients()
 	 << "   Integral Gain = " << Bi 
 	 << ",  Anti-windup Gain = " << Ao 
 	 << ",  Derivative Gains = " << Ad << "," << Bd << endl << endl;
-
-    */
 }
 
 	double 
@@ -210,8 +206,8 @@ PID::update ( double _measuredValue, double _referenceValue, double time  )
 
     prevValue = _measuredValue; //update old process output
 
-    /*
-    cout 
+    
+/*    cout 
 	<< " t " << time 
 	<< ", y " << _measuredValue
 	<< ", ysp " << _referenceValue
@@ -224,6 +220,13 @@ PID::update ( double _measuredValue, double _referenceValue, double time  )
 */	
 
     return saturatedCommand;
+}
+
+	void
+PID::reset()
+{
+    firstRun = true;
+    P = I = D = 0.0;
 }
 
 	void 
@@ -472,9 +475,10 @@ PIDStepResponseProperties::update(double _actualOutput,
     if(!riseTimeDetected 
 	    && positiveZeroCrossing(_actualOutput, prevOutput, riseTimeFractionReference * _refInput) )
     {
-	cout << " Rise Time Detected " 
+	/*cout << " Rise Time Detected " 
 	     << _actualOutput << " " 
 	     << prevOutput << endl;
+	     */
 	riseTimeSec = currTime;
 	riseTimeDetected = true;
     }
@@ -559,7 +563,7 @@ PIDStepResponseProperties::printProperties()
     cout << "Squared error: " << squaredError << endl;
     cout << "<<<<<<<<<<<<<<<<<<<<<<<<<" << endl;
     */
-    cout << setiosflags(ios::scientific) 
+    cout
 	 << setw(10)
 	 << setprecision(5)
 	 << "Rt = " << riseTimeSec
