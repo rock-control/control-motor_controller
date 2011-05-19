@@ -25,6 +25,7 @@ PIV::PIV()
     limitDiff = 0.0;
     velPrevStep = 0.0;
     setPositionController(true);
+    firstRun = true;
 }
 
 PIV::PIV ( 
@@ -44,6 +45,7 @@ PIV::PIV (
     limitDiff = 0.0;
     velPrevStep = 0.0;
     setPositionController(true);
+    firstRun = true;
 }
 
 PIV::~PIV()
@@ -104,7 +106,7 @@ PIV::updateVelLoop ( double _velMeasured, double _velCmd, double _posCommand, do
     velCommand = saturate(velCommand + Kaff * _accFF); 
     return velCommand;
 }
-
+/*
 	double 
 PIV::update ( double _velMeasured, double _velCmd, double _posError, double _accFF )
 {
@@ -113,11 +115,29 @@ PIV::update ( double _velMeasured, double _velCmd, double _posError, double _acc
    	 posCommand = updatePosLoop(_posError);
     return updateVelLoop(_velMeasured, _velCmd, posCommand, _accFF);
 }
+*/
+	double 
+PIV::update ( double _posMeasured, double _posRef, double _velFF, double _accFF )
+{
+    if(firstRun)
+    {
+	posPrevStep = _posMeasured;
+	velPrevStep = 0.0;
+	firstRun = false;
+    }
 
+    velComputed = (_posMeasured - posPrevStep ) / Ts;
+    if(posController)
+	posCommand = updatePosLoop(_posRef - _posMeasured);
+    else 
+	posCommand = 0.0;
+    return updateVelLoop(velComputed, _velFF, posCommand, _accFF);
+}
 
 	void 
 PIV::reset()
 {
     velPrevStep = 0.0;
     velITerm.init(Ts);
+    firstRun = true;
 }

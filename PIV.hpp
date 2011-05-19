@@ -44,7 +44,7 @@ namespace motor_controller
 	    double updateVelLoop ( double _velMeasured, double _velCmd, double _posCmd, double accFF=0.0 ); // update velocity loop
 	    double updatePosLoop ( double _posError ) const { return Kpp * (_posError); }; // updates position loop
 
-	    double update ( double _velMeasured, double _velCmd, double _posError=0.0, double _accFF=0.0  ); // updates both the loops
+	    double update ( double _posMeasured, double _posRef, double _velFF = 0.0, double _accFF = 0.0 );
 
 
 	private:
@@ -65,8 +65,13 @@ namespace motor_controller
 	    double YMin; // Minimum output value
 
 	    double velPrevStep; // Velocity from previous step for filtering
+	    double posPrevStep; // Position from the previous step for velocity calculation
 
 	    bool posController; // Activate or deactivate position controller
+	    bool firstRun;      // To check if it is the first run
+
+	    double posCommand; // Generated position command
+	    double velComputed; // Velocity computed from the position input
 
 	    SimpleIntegrator velITerm; // Integral term
     };
