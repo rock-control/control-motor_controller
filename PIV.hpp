@@ -12,7 +12,7 @@
 #ifndef CONTROLLERPIVCONTROLLER_H
 #define CONTROLLERPIVCONTROLLER_H
 
-# include "SimpleIntegrator.hpp"
+#include "SimpleIntegrator.hpp"
 
 namespace motor_controller
 {
@@ -36,6 +36,8 @@ namespace motor_controller
 	    void setOutputLimits ( double _YMin, double _YMax ){ YMin = _YMin; YMax = _YMax; }; // Sets the max and min output limits
 	    void setPositionController(bool _status) { posController = _status; };
 	    void setIntegratorWindupCoeff (double _Kt) { Kt = _Kt; }; // Sets the intergrator wind up coefficients
+	    double getSmoothenedVelocity() { return velSmooth; };
+	    double getVelocity() { return velComputed; };
 
 	    double saturate_windup(double _value); // Saturates the input based on YMin and YMax returns the excess value
 	    double saturate ( double _val );
@@ -72,6 +74,9 @@ namespace motor_controller
 
 	    double posCommand; // Generated position command
 	    double velComputed; // Velocity computed from the position input
+
+	    double velSmooth;  // Smoothened velocity
+	    double velCommand; // the velocity command
 
 	    SimpleIntegrator velITerm; // Integral term
     };

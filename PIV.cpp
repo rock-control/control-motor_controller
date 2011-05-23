@@ -98,7 +98,6 @@ PIV::saturate ( double _val )
 	double 
 PIV::updateVelLoop ( double _velMeasured, double _velCmd, double _posCommand, double _accFF )
 {
-    double velSmooth, velCommand;
     velSmooth = (1-Kalp)*_velMeasured + Kalp*velPrevStep;
     velPrevStep = velSmooth;
     velCommand = (Kvff * _velCmd) + _posCommand - velSmooth;
