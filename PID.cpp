@@ -39,9 +39,13 @@ negativeZeroCrossing(double currValue, double prevValue, double refValue)
     return false;
 }
 
-PID::PID()
+PID::PID():
+initialized(false),K(0),Ti(0),Td(0),N(0),B(1),Tt(-1),Ts(0),
+YMax(0),YMin(0),prevValue(0),Bi(0),Ad(0),Bd(0),Ao(0),P(0),
+I(0),D(0),rawCommand(0),saturatedCommand(0),bIntegral(false),
+bDerivative(false),bDerivativeFiltering(false),Kold(0),Bold(0),
+firstRun(true)
 { 
-    initialized = false; 
 };
 
 	void 
