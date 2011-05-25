@@ -45,7 +45,7 @@ namespace motor_controller
     struct PIDSettings
     {   
         double Ts,K,Ti,Td,N,B,Tt,YMin,YMax;
-        PIDSettings():Ts(0),K(0),Ti(0),Td(0),N(0),B(1),Tt(0),YMin(0),YMax(0){};
+        PIDSettings():Ts(0),K(0),Ti(0),Td(0),N(0),B(1),Tt(-1),YMin(0),YMax(0){};
     };
 
     class PID
