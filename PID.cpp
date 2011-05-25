@@ -235,6 +235,7 @@ PID::reset()
 {
     firstRun = true;
     P = I = D = 0.0;
+    saturatedCommand = rawCommand = 0.0;
 }
 
 	void 
