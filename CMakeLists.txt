@@ -19,12 +19,14 @@ INCLUDE_DIRECTORIES(/usr/include/eigen2)
 ADD_LIBRARY(motor_controller SHARED 
 	    PIV.cpp
 	    PID.cpp
+	    InputShaper.cpp
 	    RK4Integrator.cpp
 	    SimpleIntegrator.cpp
 	    Ramp.cpp
 	    Ramp.hpp
 	    PIV.hpp
 	    PID.hpp
+	    InputShaper.hpp
 	    RK4Integrator.hpp
 	    SimpleIntegrator.hpp)
  
@@ -36,7 +38,8 @@ INSTALL(TARGETS motor_controller
 INSTALL(FILES  
 	Ramp.hpp
        	PIV.hpp
-       	PID.hpp
+	PID.hpp
+	InputShaper.hpp
         RK4Integrator.hpp
         SimpleIntegrator.hpp
 	DESTINATION include)
