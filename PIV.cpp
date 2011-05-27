@@ -130,6 +130,8 @@ PIV::update ( double _posMeasured, double _posRef, double _velFF, double _accFF 
 	posCommand = updatePosLoop(_posRef - _posMeasured);
     else 
 	posCommand = 0.0;
+
+    posPrevStep = _posMeasured;
     return updateVelLoop(velComputed, _velFF, posCommand, _accFF);
 }
 
@@ -139,4 +141,20 @@ PIV::reset()
     velPrevStep = 0.0;
     velITerm.init(Ts);
     firstRun = true;
+}
+
+        void
+PIV::printCoefficients()
+{
+    std::cout << "PIV Coefficients : " << std::endl ;
+    std::cout << " Kpp : " << Kpp << std::endl 
+              << " Kiv : " << Kiv << std::endl 
+              << " Kpv : " << Kpv << std::endl 
+              << " Kvff : " << Kvff << std::endl 
+              << " Kaff : " << Kaff << std::endl 
+              << " Kalp : " << Kalp << std::endl 
+              << " Kt : "   << Kt << std::endl 
+              << " Ts : " << Ts << std::endl 
+              << " YMax : " << YMax << std::endl 
+              << " YMin : " << YMin << std::endl ;
 }

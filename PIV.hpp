@@ -48,6 +48,8 @@ namespace motor_controller
 
 	    double update ( double _posMeasured, double _posRef, double _velFF = 0.0, double _accFF = 0.0 );
 
+            void printCoefficients();
+
 
 	private:
 	    double Kpp; // Proportional Position loop
