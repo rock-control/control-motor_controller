@@ -30,11 +30,11 @@
 class SimpleIntegrator : public RK4_SIM
 {
     public:
-	/* ====================  LIFECYCLE     ======================================= */
 	SimpleIntegrator ();
 	SimpleIntegrator (double _sample_time, double _initial_time = 0.0, double _init_val = 0.0);                             /* constructor */
 
-	/* ====================  MUTATORS      ======================================= */
+	~SimpleIntegrator() {}  
+
 	void init(double _sample_time, double _initial_time = 0.0, double _init_val = 0.0);
 
 	// Overload DERIV function of RK4_SIM for the integrator
@@ -45,7 +45,6 @@ class SimpleIntegrator : public RK4_SIM
     protected:
 
     private:
-}; /* -----  end of class VelocityPositionEstimator  ----- */
+}; 
 
-
-#endif   /* ----- #ifndef SIMPLEINTEGRATOR_H__INC  ----- */
+#endif 

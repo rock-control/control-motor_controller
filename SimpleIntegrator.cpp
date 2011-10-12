@@ -18,13 +18,12 @@
 #include "SimpleIntegrator.hpp"
 
 SimpleIntegrator::SimpleIntegrator() : RK4_SIM(1, 1)
-{
-}  /* -----  end of method VelocityIntegrator::VelocityIntegrator  (constructor)  ----- */
+{}
 
 SimpleIntegrator::SimpleIntegrator(double _sample_time, double _initial_time, double _init_val) : RK4_SIM(1, 1)
 {
     init(_sample_time,_initial_time,_init_val);
-}  /* -----  end of method VelocityIntegrator::VelocityIntegrator  (constructor)  ----- */
+}
 
 void SimpleIntegrator::init(double _sample_time, double _initial_time, double _init_val)
 {

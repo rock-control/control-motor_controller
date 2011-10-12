@@ -1,6 +1,4 @@
 /* 
- * FILE --- rk4_sim.hh
- *
  * PURPOSE --- Header file for a class for a 4'th order Runge-Kutta 
  * method for solving a system of  n first order differential equations. 
  * If the initial equation is in the form of n'th order differential equation
@@ -9,18 +7,11 @@
  *
  */
 
-// Prevent Multiple Inclusion
-#ifndef RK4_SIM_HH
-#define RK4_SIM_HH
+#ifndef RK4_INTEGRATOR_HPP
+#define RK4_INTEGRATOR_HPP
 
-// Include Files
 #include <stdlib.h>
-
-// Local Definitions
-#define RK4_SIM_NO_ERROR 0
-#define RK4_SIM_MEM_ERROR 1
-#define RK4_SIM_UNKNOWN_IC_ERROR 2
-
+#include <vector>
 
 class RK4_SIM
 {
@@ -54,23 +45,25 @@ class RK4_SIM
 	virtual void DERIV(const double t, const double *x, 
 		const double *u, double *xdot) {};
 
-
-	double *plant_state; // Current System states
-	double *ctrl_input; // Current Controller output
-	double current_time;  // Current time
-	int rk4_sim_err;   // Variable to hold an error number
-
     protected:
 	int plant_order; // Num of plant states
 	int ctrl_order; // Num of control inputs
 	double integration_step; // Integration step size
 
-    private:
-	// Allocate/free memory for the arrays
-	void allocate_memory(void);
-	void free_memory(void);
+    public:
 
-	double *f1, *f2, *f3, *f4, *temp; // Runge-Kutta Coefficients
+	std::vector<double> plant_state; // Current System states
+	std::vector<double> ctrl_input; // Current Controller output
+
+	double current_time;  // Current time
+	int rk4_sim_err;   // Variable to hold an error number
+
+    private:
+	std::vector<double> f1; 
+	std::vector<double> f2; 
+	std::vector<double> f3; 
+	std::vector<double> f4; 
+	std::vector<double> temp; // Runge-Kutta Coefficients
 
 	// Functions which calculate RK coefficients
 	inline void F1 (void); 
@@ -78,7 +71,6 @@ class RK4_SIM
 	inline void F3 (void);
 	inline void F4 (void);
 };
-
-#endif // RK4_SIM_HH
+#endif
 
 
