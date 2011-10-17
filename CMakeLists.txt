@@ -42,6 +42,15 @@ INSTALL(FILES
 	InputShaper.hpp
         RK4Integrator.hpp
         SimpleIntegrator.hpp
+	DESTINATION include/motor_controller)
+
+INSTALL(FILES  
+	compat/Ramp.hpp
+       	compat/PIV.hpp
+	compat/PID.hpp
+	compat/InputShaper.hpp
+        compat/RK4Integrator.hpp
+        compat/SimpleIntegrator.hpp
 	DESTINATION include)
 
 CONFIGURE_FILE(motor_controller.pc.in motor_controller.pc @ONLY)
