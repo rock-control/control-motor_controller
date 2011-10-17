@@ -3,9 +3,10 @@ exec_prefix=@CMAKE_INSTALL_PREFIX@
 libdir=${prefix}/lib
 includedir=${prefix}/include
 
-Name:Motor controller
-Description: A driver that generates drive commands from a point and a position
+Name: @TARGET_NAME@
+Description: @PROJECT_DESCRIPTION@
 Version: @PROJECT_VERSION@
-Libs: -L${libdir} -lmotor_controller
+Requires: @DEPS_PKGCONFIG@
+Libs: -L${libdir} -l@TARGET_NAME@
 Cflags: -I${includedir}
 

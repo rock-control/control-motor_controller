@@ -6,6 +6,4 @@
         DFKI/robotik@dfki.de
     </copyright>
     <license>LGPL v2 or later</license>
-
-    <depend package="base/types" />
 </package>

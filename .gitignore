@@ -1,5 +1,2 @@
-*~
-.*.swp
-build/*
-*autobuild-stamp
-
+build/
+*.sw?
