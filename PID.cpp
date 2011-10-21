@@ -203,7 +203,7 @@ PID::update ( double _measuredValue, double _referenceValue, double time  )
     {
 	// for bumpless motion on parameter change
 	I = I + Kold*(Bold * _referenceValue - _measuredValue)
-	      - K    *(B     * _referenceValue - _measuredValue); 
+	      - K   *(B    * _referenceValue - _measuredValue); 
 	Kold = K;
 	Bold = B;
     }

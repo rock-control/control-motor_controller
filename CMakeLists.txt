@@ -23,6 +23,8 @@ ADD_LIBRARY(motor_controller SHARED
 	    RK4Integrator.cpp
 	    SimpleIntegrator.cpp
 	    Ramp.cpp
+	    PositionVelocityTorqueCascade.cpp
+	    PositionVelocityTorqueCascade.hpp
 	    Ramp.hpp
 	    PIV.hpp
 	    PID.hpp
@@ -40,6 +42,7 @@ INSTALL(FILES
        	PIV.hpp
 	PID.hpp
 	InputShaper.hpp
+	PositionVelocityTorqueCascade.hpp
         RK4Integrator.hpp
         SimpleIntegrator.hpp
 	DESTINATION include)
