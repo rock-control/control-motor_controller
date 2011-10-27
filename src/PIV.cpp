@@ -105,16 +105,7 @@ PIV::updateVelLoop ( double _velMeasured, double _velCmd, double _posCommand, do
     velCommand = saturate(velCommand + Kaff * _accFF); 
     return velCommand;
 }
-/*
-	double 
-PIV::update ( double _velMeasured, double _velCmd, double _posError, double _accFF )
-{
-    double posCommand = 0.0;
-    if(posController)
-   	 posCommand = updatePosLoop(_posError);
-    return updateVelLoop(_velMeasured, _velCmd, posCommand, _accFF);
-}
-*/
+
 	double 
 PIV::update ( double _posMeasured, double _posRef, double _velFF, double _accFF )
 {

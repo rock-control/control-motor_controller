@@ -1,7 +1,8 @@
 rock_library(motor_controller
-    SOURCES InputShaper.cpp PID.cpp PIV.cpp Ramp.cpp RK4Integrator.cpp SimpleIntegrator.cpp
+    SOURCES InputShaper.cpp PID.cpp PIV.cpp Ramp.cpp RK4Integrator.cpp
+    SimpleIntegrator.cpp PositionVelocityTorqueCascade.hpp
     HEADERS InputShaper.hpp PID.hpp PIV.hpp Ramp.hpp RK4Integrator.hpp
-    SimpleIntegrator.hpp)
+    SimpleIntegrator.hpp PositionVelocityTorqueCascade.hpp)
 
 # For backward compatibility only
 install(FILES  
@@ -11,5 +12,6 @@ install(FILES
 	compat/InputShaper.hpp
         compat/RK4Integrator.hpp
         compat/SimpleIntegrator.hpp
+        compat/PositionVelocityTorqueCascade.hpp
 	DESTINATION include)
 
