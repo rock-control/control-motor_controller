@@ -22,10 +22,8 @@ PIV::PIV()
     setSamplingTime ( 0 );
     setOutputLimits ( 0, 0 );
     setIntegratorWindupCoeff ( 0 );
-    limitDiff = 0.0;
-    velPrevStep = 0.0;
     setPositionController(true);
-    firstRun = true;
+    reset();
 }
 
 PIV::PIV ( 
@@ -42,10 +40,8 @@ PIV::PIV (
     setSamplingTime ( _Ts );
     setOutputLimits ( _YMin,  _YMax );
     setIntegratorWindupCoeff ( _Kt );
-    limitDiff = 0.0;
-    velPrevStep = 0.0;
     setPositionController(true);
-    firstRun = true;
+    reset();
 }
 
 PIV::~PIV()
@@ -129,6 +125,7 @@ PIV::update ( double _posMeasured, double _posRef, double _velFF, double _accFF 
 	void 
 PIV::reset()
 {
+    limitDiff = 0.0;
     velPrevStep = 0.0;
     velITerm.init(Ts);
     firstRun = true;
