@@ -16,6 +16,21 @@
 
 namespace motor_controller
 {
+    struct PIVSettings {
+        double Kpp;  //!< Position Proportional Gain.
+        double Kiv;  //!< Velocity Integral Gain.
+        double Kpv;  //!< Velocity Proportional Gain.
+        double Kvff; //!< Velocity Feedforward Gain.
+        double Kaff; //!< Acceleration Feedforward Gain.
+        double Kalp; //!< Velocity Estimation Smoothing Factor.
+        double Ts;   //!< Sampling Time.
+        double YMin; //!< Lower Output Limit.
+        double YMax; //!< Upper Output Limit.
+        double Kt;   //!< Anti-Windup Coefficient.
+        PIVSettings() : Kpp(0),Kiv(0),Kpv(0),Kvff(0),Kaff(0),Kalp(0),Ts(0.1),
+            YMin(0), YMax(0), Kt(0) {}      
+    };
+
     class PIV
     {
 	public:
@@ -26,6 +41,7 @@ namespace motor_controller
 		    double _Ts, 
 		    double _YMin = 0, double _YMax = 0, 
 		    double _Kt = 0);
+        PIV ( const struct PIVSettings& _settings );
 
 	    ~PIV();
 
@@ -36,6 +52,7 @@ namespace motor_controller
 	    void setOutputLimits ( double _YMin, double _YMax ){ YMin = _YMin; YMax = _YMax; }; // Sets the max and min output limits
 	    void setPositionController(bool _status) { posController = _status; };
 	    void setIntegratorWindupCoeff (double _Kt) { Kt = _Kt; }; // Sets the intergrator wind up coefficients
+      void setPIVSettings ( const struct PIVSettings& _settings );
 	    double getSmoothenedVelocity() { return velSmooth; };
 	    double getVelocity() { return velComputed; };
 

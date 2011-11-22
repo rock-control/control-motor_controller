@@ -43,9 +43,27 @@ PIV::PIV (
     setPositionController(true);
     reset();
 }
+        
+PIV::PIV ( const struct PIVSettings& _settings ) 
+{
+    setPIVSettings( _settings );
+    setPositionController(true);
+}
 
 PIV::~PIV()
 {
+}
+
+    void
+PIV::setPIVSettings ( const struct PIVSettings& _settings )
+{
+    setGains ( _settings.Kpp, _settings.Kiv,  _settings.Kpv );
+    setFeedForwardGain( _settings.Kvff, _settings.Kaff );
+    setVelSmoothingGain( _settings.Kalp );
+    setSamplingTime ( _settings.Ts );
+    setOutputLimits ( _settings.YMin,  _settings.YMax );
+    setIntegratorWindupCoeff ( _settings.Kt );
+    reset();
 }
 
 	void 
