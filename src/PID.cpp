@@ -1,14 +1,3 @@
-//
-// C++ Implementation: PID
-//
-// Description:
-//
-//
-// Author:  <Ajish Babu>, (C) 2011
-//
-// Copyright: See COPYING file that comes with this distribution
-//
-//
 #include "PID.hpp"
 
 using namespace motor_controller;
@@ -40,8 +29,7 @@ negativeZeroCrossing(double currValue, double prevValue, double refValue)
 }
 
 PID::PID():
-initialized(false),K(0),Ti(0),Td(0),N(0),B(1),Tt(-1),Ts(0),
-YMax(0),YMin(0),prevValue(0),Bi(0),Ad(0),Bd(0),Ao(0),P(0),
+initialized(false),prevValue(0),Bi(0),Ad(0),Bd(0),Ao(0),P(0),
 I(0),D(0),rawCommand(0),saturatedCommand(0),bIntegral(false),
 bDerivative(false),bDerivativeFiltering(false),Kold(0),Bold(0),
 firstRun(true)
@@ -66,9 +54,7 @@ PID::setParallelCoefficients(double _Ts,
         void 
 PID::setPIDSettings(const PIDSettings &_settings)
 {
-    setIdealCoefficients(_settings.Ts, _settings.K, _settings.Ti,
-                         _settings.Td, _settings.N, _settings.B,
-                         _settings.Tt, _settings.YMin, _settings.YMax);
+	gains = _settings;
 }
 
 	void 
@@ -84,8 +70,8 @@ PID::setIdealCoefficients (double _Ts,
 {
     if(initialized)
     {
-	Kold = K;
-	Bold = B;
+	Kold = gains.K;
+	Bold = gains.B;
     }
     else
     {
@@ -93,27 +79,27 @@ PID::setIdealCoefficients (double _Ts,
 	Bold = _B;
     }
 
-    K = _K;
-    Ti = _Ti;
-    Td = _Td;
-    N = _N;
-    Ts = _Ts;
-    B = _B;
-    Tt = _Tt;
-    YMin = _YMin;
-    YMax = _YMax;
+    gains.K = _K;
+    gains.Ti = _Ti;
+    gains.Td = _Td;
+    gains.N = _N;
+    gains.Ts = _Ts;
+    gains.B = _B;
+    gains.Tt = _Tt;
+    gains.YMin = _YMin;
+    gains.YMax = _YMax;
 
-    if(Ti == 0.0 || isnan(Ti) || isinf(Ti) )   // turns off integral controller
+    if(gains.Ti == 0.0 || isnan(gains.Ti) || isinf(gains.Ti) )   // turns off integral controller
 	bIntegral = false;
     else
 	bIntegral = true;
 
-    if(Td == 0.0)         // turns off derivative term
+    if(gains.Td == 0.0)         // turns off derivative term
 	bDerivative = false;
     else
 	bDerivative = true;
 
-    if(N == 0.0)          // turns off derviative filtering
+    if(gains.N == 0.0)          // turns off derviative filtering
 	bDerivativeFiltering = false;	
     else
 	bDerivativeFiltering = true;
@@ -124,12 +110,12 @@ PID::setIdealCoefficients (double _Ts,
 	double 
 PID::saturate ( double _val )
 {
-    if ( YMax == 0.0 && YMin == 0.0 ) 
+    if ( gains.YMax == 0.0 && gains.YMin == 0.0 ) 
 	return _val;
-    else if ( _val > YMax )
-	return YMax;
-    else if ( _val < YMin )
-	return YMin;
+    else if ( _val > gains.YMax )
+	return gains.YMax;
+    else if ( _val < gains.YMin )
+	return gains.YMin;
     else 
 	return _val;
 }
@@ -140,12 +126,12 @@ PID::computeCoefficients()
     Bi = Ao = Ad = Bd = 0.0;
     if(bIntegral)
     {
-	Bi = K*Ts/Ti; // integral gain
-	if(Tt == 0 && Td != 0.0) // if Tt is zero and Td nonzero take the ideal value
-	    Tt = sqrt(Ti*Td);  // approximate ideal value
+	Bi = gains.K*gains.Ts/gains.Ti; // integral gain
+	if(gains.Tt == 0 && gains.Td != 0.0) // if Tt is zero and Td nonzero take the ideal value
+	    gains.Tt = sqrt(gains.Ti*gains.Td);  // approximate ideal value
 	
-	if(Tt > 0.0)
-	    Ao = Ts/Tt;  // anti-windup
+	if(gains.Tt > 0.0)
+	    Ao = gains.Ts/gains.Tt;  // anti-windup
 	else 
 	    Ao = 0.0;
     }
@@ -154,12 +140,12 @@ PID::computeCoefficients()
     {
 	if(bDerivativeFiltering)
 	{
-	    Ad = Td/(Td+N*Ts);
-	    Bd = K*N*Ad; //derivative gain
+	    Ad = gains.Td/(gains.Td+gains.N*gains.Ts);
+	    Bd = gains.K*gains.N*Ad; //derivative gain
 	}
 	else
 	{
-	    Bd = K*Td/Ts; //derivative gain
+	    Bd = gains.K*gains.Td/gains.Ts; //derivative gain
 	}
     }
 
@@ -172,17 +158,17 @@ PID::printCoefficients()
 {
     cout << "PID PARAMETERS" << endl;
     cout << " Ideal type parameters " << endl
-         << "   Kp = " << K 
-         << ",  Ti = " << Ti
-         << ",  Td = " << Td << endl; 
+         << "   Kp = " << gains.K 
+         << ",  Ti = " << gains.Ti
+         << ",  Td = " << gains.Td << endl; 
 
     cout << " Parallel type parameters " << endl; 
-    cout << "Kp = " << K 
-         << ", Ki = " << 1.0 / Ti / K
-         << ", Kd = " << Td * K << " >>> " ;
+    cout << "Kp = " << gains.K 
+         << ", Ki = " << 1.0 / gains.Ti / gains.K
+         << ", Kd = " << gains.Td * gains.K << " >>> " ;
 
-    cout << " Anti-integrator windup gain = " << Tt << endl; 
-    cout << " Derivative smoothing factor (N) = " << N << endl; 
+    cout << " Anti-integrator windup gain = " << gains.Tt << endl; 
+    cout << " Derivative smoothing factor (N) = " << gains.N << endl; 
 
     cout << " Internal terms " << endl 
 	 << "   Integral Gain = " << Bi 
@@ -199,16 +185,16 @@ PID::update ( double _measuredValue, double _referenceValue, double time  )
 	prevValue = _measuredValue;
     }
 
-    if( (Kold != K || Bold != B) && bIntegral)
+    if( (Kold != gains.K || Bold != gains.B) && bIntegral)
     {
 	// for bumpless motion on parameter change
-	I = I + Kold*(Bold * _referenceValue - _measuredValue)
-	      - K   *(B    * _referenceValue - _measuredValue); 
-	Kold = K;
-	Bold = B;
+	I = I + Kold*(Bold     * _referenceValue - _measuredValue)
+	      - gains.K   *(gains.B  * _referenceValue - _measuredValue); 
+	Kold = gains.K;
+	Bold = gains.B;
     }
 
-    P = K*(B*_referenceValue - _measuredValue); // Compute proportional part
+    P = gains.K*(gains.B*_referenceValue - _measuredValue); // Compute proportional part
     I = I + Bi*(_referenceValue - _measuredValue) // Update integral part
 	  + Ao*(saturatedCommand-rawCommand); // Update integral anti-windup
     D = Ad*D - Bd*(_measuredValue - prevValue); // Compute derivative part
@@ -259,7 +245,7 @@ PID::enableIntegral()
 	void 
 PID::enableIntegral(double _Ti)  
 { 
-    Ti = _Ti; 
+    gains.Ti = _Ti; 
     enableIntegral();
 } 
 
@@ -280,7 +266,7 @@ PID::enableDerivative()
 	void 
 PID::enableDerivative(double _Td)  
 { 
-    Td = _Td; 
+    gains.Td = _Td; 
     enableDerivative();
 } 
 
@@ -301,7 +287,7 @@ PID::enableDerivativeFiltering()
 	void 
 PID::enableDerivativeFiltering(double _N)  
 { 
-    N = _N; 
+    gains.N = _N; 
     enableDerivativeFiltering();
 } 
 
