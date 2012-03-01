@@ -84,7 +84,12 @@ PIV::setSamplingTime ( double _Ts )
 	double 
 PIV::saturate_windup ( double _val )
 {
-    if ( _val > YMax )
+    if(YMax == YMin)  // No limits set
+    {
+	limitDiff = 0.0;
+        return _val;
+    }
+    else if ( _val > YMax )
     {
 	limitDiff = YMax - _val;
 	return YMax;
@@ -95,18 +100,35 @@ PIV::saturate_windup ( double _val )
 	return YMin;
     }
     else 
+    {
+	limitDiff = 0.0;
 	return _val;
+    }
 }
 
 	double 
 PIV::saturate ( double _val )
 {
-    if ( _val > YMax )
+    if(YMax == YMin)  // No limits set
+    {
+        bSaturated = false;
+        return _val;
+    }
+    else if ( _val > YMax ) // Crosses upper limit
+    {
+        bSaturated = true;
 	return YMax;
-    else if ( _val < YMin )
+    }
+    else if ( _val < YMin ) // Crossed lower limit
+    {
+        bSaturated = true;
 	return YMin;
+    }
     else 
-	return _val;
+    {
+        bSaturated = false;
+	return _val;  // Within limits
+    }
 }
 
 	double 
@@ -147,6 +169,7 @@ PIV::reset()
     velPrevStep = 0.0;
     velITerm.init(Ts);
     firstRun = true;
+    bSaturated = false;
 }
 
         void

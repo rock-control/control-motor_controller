@@ -55,6 +55,7 @@ namespace motor_controller
       void setPIVSettings ( const struct PIVSettings& _settings );
 	    double getSmoothenedVelocity() { return velSmooth; };
 	    double getVelocity() { return velComputed; };
+            bool isSaturated() { return bSaturated; }
 
 	    double saturate_windup(double _value); // Saturates the input based on YMin and YMax returns the excess value
 	    double saturate ( double _val );
@@ -90,6 +91,7 @@ namespace motor_controller
 
 	    bool posController; // Activate or deactivate position controller
 	    bool firstRun;      // To check if it is the first run
+            bool bSaturated;    // True if the last run was saturated
 
 	    double posCommand; // Generated position command
 	    double velComputed; // Velocity computed from the position input
