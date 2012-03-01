@@ -205,6 +205,9 @@ namespace motor_controller
 	    //! Enables the derivative filtering with time constant \c _N
 	    void enableDerivativeFiltering(double _N)  ; 
 
+            //! Returns true if the controller got saturated in the last run
+            bool isSaturated();
+
 	private:
 
 		//! PID gains 
@@ -235,6 +238,9 @@ namespace motor_controller
 
 		//! true if first run 
 	    bool firstRun;
+
+            //! true if the controller is saturated
+            bool bSaturated;
 
 	    //! Computes the controller coefficients
 	    void computeCoefficients();

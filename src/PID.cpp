@@ -32,7 +32,7 @@ PID::PID():
 initialized(false),prevValue(0),Bi(0),Ad(0),Bd(0),Ao(0),P(0),
 I(0),D(0),rawCommand(0),saturatedCommand(0),bIntegral(false),
 bDerivative(false),bDerivativeFiltering(false),Kold(0),Bold(0),
-firstRun(true)
+firstRun(true),bSaturated(false)
 { 
 };
 
@@ -111,13 +111,25 @@ PID::setIdealCoefficients (double _Ts,
 PID::saturate ( double _val )
 {
     if ( gains.YMax == 0.0 && gains.YMin == 0.0 ) 
+    {
+        bSaturated = false;
 	return _val;
+    }
     else if ( _val > gains.YMax )
+    {
+        bSaturated = true;
 	return gains.YMax;
+    }
     else if ( _val < gains.YMin )
+    {
+        bSaturated = true;
 	return gains.YMin;
+    }
     else 
+    {
+        bSaturated = false;
 	return _val;
+    }
 }
 
 	void 
@@ -291,6 +303,11 @@ PID::enableDerivativeFiltering(double _N)
     enableDerivativeFiltering();
 } 
 
+        bool
+PID::isSaturated()
+{
+    return bSaturated;
+}
 
 
 
