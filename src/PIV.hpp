@@ -54,8 +54,10 @@ namespace motor_controller
 	    void setIntegratorWindupCoeff (double _Kt) { Kt = _Kt; }; // Sets the intergrator wind up coefficients
       void setPIVSettings ( const struct PIVSettings& _settings );
 	    double getSmoothenedVelocity() { return velSmooth; };
-	    double getVelocity() { return velComputed; };
+	    double getVelocity() { return velComputed; }
             bool isSaturated() { return bSaturated; }
+
+        double getPosCommand() { return posCommand; }
 
 	    double saturate_windup(double _value); // Saturates the input based on YMin and YMax returns the excess value
 	    double saturate ( double _val );
@@ -67,6 +69,9 @@ namespace motor_controller
 	    double update ( double _posMeasured, double _posRef, double _velFF = 0.0, double _accFF = 0.0 );
 
             void printCoefficients();
+
+    double getKvff () { return Kvff; }
+    double getKpp () { return Kpp; }
 
 
 	private:
