@@ -76,6 +76,23 @@ namespace motor_controller
 
 		//! Constructor
         PIDSettings():Ts(0),K(0),Ti(0),Td(0),N(0),B(1),Tt(-1),YMin(0),YMax(0){};
+
+        bool operator==(const PIDSettings& other) const{
+            return 
+                Ts == other.Ts &&
+                K == other.K &&
+                Ti == other.Ti &&
+                Td == other.Td &&
+                N == other.N &&
+                B == other.B &&
+                Tt == other.Tt &&
+                YMin == other.YMin &&
+                YMax == other.YMax;
+        }
+
+        bool operator!=(const PIDSettings& other) const{
+            return !(*this == other);
+        }
     };
 
 	/**
