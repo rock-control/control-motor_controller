@@ -28,6 +28,13 @@ negativeZeroCrossing(double currValue, double prevValue, double refValue)
     return false;
 }
 
+void PIDSettings::setParallelCoefficients(double _Kp, double _Ki, double _Kd)
+{
+    K  = _Kp;
+    Ti = _Kp / _Ki;
+    Td = _Kd / _Kp;
+}
+
 PID::PID():
 initialized(false),prevValue(0),Bi(0),Ad(0),Bd(0),Ao(0),P(0),
 I(0),D(0),rawCommand(0),saturatedCommand(0),bIntegral(false),
@@ -47,14 +54,31 @@ PID::setParallelCoefficients(double _Ts,
 	double _YMin, 
 	double _YMax)
 {
-    setIdealCoefficients(_Ts, _Kp, 1.0/_Ki/_Kp, _Kd/_Kp,
+    // Cheat, only convert the coefficients using PIDSettings and then call
+    // setIdealCoefficients
+    PIDSettings settings;
+    settings.setParallelCoefficients(_Kp, _Ki, _Kd);
+    setIdealCoefficients(_Ts, _Kp, settings.Ti, settings.Td,
 	    _N, _B, _Tt, _YMin, _YMax);
 }
 
-        void 
+    void 
 PID::setPIDSettings(const PIDSettings &_settings)
 {
-	gains = _settings;
+    if(initialized)
+    {
+        Kold = gains.K;
+        Bold = gains.B;
+    }
+    else
+    {
+        Kold = _settings.K;
+        Bold = _settings.B;
+    }
+
+    gains = _settings;
+    autoEnableModes();
+    computeCoefficients();
 }
 
 	void 
@@ -68,27 +92,22 @@ PID::setIdealCoefficients (double _Ts,
 		    double _YMin, 
 		    double _YMax)
 {
-    if(initialized)
-    {
-	Kold = gains.K;
-	Bold = gains.B;
-    }
-    else
-    {
-	Kold = _K;
-	Bold = _B;
-    }
+    PIDSettings new_settings;
+    new_settings.K = _K;
+    new_settings.Ti = _Ti;
+    new_settings.Td = _Td;
+    new_settings.N = _N;
+    new_settings.Ts = _Ts;
+    new_settings.B = _B;
+    new_settings.Tt = _Tt;
+    new_settings.YMin = _YMin;
+    new_settings.YMax = _YMax;
+    setPIDSettings(new_settings);
+}
 
-    gains.K = _K;
-    gains.Ti = _Ti;
-    gains.Td = _Td;
-    gains.N = _N;
-    gains.Ts = _Ts;
-    gains.B = _B;
-    gains.Tt = _Tt;
-    gains.YMin = _YMin;
-    gains.YMax = _YMax;
-
+void
+PID::autoEnableModes()
+{
     if(gains.Ti == 0.0 || isnan(gains.Ti) || isinf(gains.Ti) )   // turns off integral controller
 	bIntegral = false;
     else
@@ -103,8 +122,6 @@ PID::setIdealCoefficients (double _Ts,
 	bDerivativeFiltering = false;	
     else
 	bDerivativeFiltering = true;
-
-    computeCoefficients();
 }
 
 	double 

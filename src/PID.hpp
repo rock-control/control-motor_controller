@@ -93,6 +93,11 @@ namespace motor_controller
         bool operator!=(const PIDSettings& other) const{
             return !(*this == other);
         }
+
+	    void setParallelCoefficients(
+		    double _Kp = 0,
+		    double _Ki = 0,
+		    double _Kd = 0);
     };
 
 	/**
@@ -261,6 +266,10 @@ namespace motor_controller
 
 	    //! Computes the controller coefficients
 	    void computeCoefficients();
+
+        //! Enables or disables the various modes (integral, ...) based on
+        // whether the corresponding gains are set
+        void autoEnableModes();
     };
 
     //! PID auto tuning using Relay Feedback 
