@@ -326,8 +326,19 @@ PID::isSaturated()
     return bSaturated;
 }
 
-
-
+PIDState
+PID::getState() const
+{
+    PIDState state;
+    state.time = base::Time::now();
+    state.P = P;
+    state.I = I;
+    state.D = D;
+    state.input = prevValue;
+    state.rawOutput = rawCommand;
+    state.saturatedOutput = saturatedCommand;
+    return state;
+}
 
 
 PIDAutoTuning::PIDAutoTuning()

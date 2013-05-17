@@ -15,6 +15,7 @@
 #include <iostream>
 #include <iomanip>
 #include <vector>
+#include <base/time.h>
 
 //! Detects zero crossing.
 bool zeroCrossing(double currValue, double prevValue, double refValue = 0);
@@ -98,6 +99,21 @@ namespace motor_controller
 		    double _Kp = 0,
 		    double _Ki = 0,
 		    double _Kd = 0);
+    };
+
+    /** Representation of the internal state of a PID controller
+     *
+     * This is meant to be used for debugging / logging purposes mainly
+     */
+    struct PIDState
+    {
+        base::Time time;
+
+        bool initialized;
+        double P, I, D;
+        double input;
+        double rawOutput;
+        double saturatedOutput;
     };
 
 	/**
@@ -227,8 +243,11 @@ namespace motor_controller
 	    //! Enables the derivative filtering with time constant \c _N
 	    void enableDerivativeFiltering(double _N)  ; 
 
-            //! Returns true if the controller got saturated in the last run
-            bool isSaturated();
+        //! Returns true if the controller got saturated in the last run
+        bool isSaturated();
+
+        //! Returns the internal state of the controller
+        PIDState getState() const;
 
 	private:
 
