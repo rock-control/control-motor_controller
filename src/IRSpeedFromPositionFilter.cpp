@@ -2,6 +2,12 @@
 
 using namespace motor_controller;
 
+IRSpeedFromPositionFilter::IRSpeedFromPositionFilter(float factor, size_t size)
+    : mFactor(factor)
+{
+    mLast.resize(size);
+}
+
 bool IRSpeedFromPositionFilter::update(base::samples::Joints& joints, bool force)
 {
     if (mLast.time.isNull())

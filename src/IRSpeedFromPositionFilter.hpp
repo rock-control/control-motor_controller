@@ -19,7 +19,7 @@ namespace motor_controller
          * @param factor the IR filter factor. A velocity update is factor *
          * new + (1-factor)*old
          */
-        IRSpeedFromPositionFilter(float factor);
+        IRSpeedFromPositionFilter(float factor, size_t size = 0);
 
         /** Update the velocities in the given structure, modifying it, if
          * possible
