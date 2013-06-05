@@ -2,20 +2,51 @@
 
 using namespace motor_controller;
 
+IRSingleSpeedFromPositionFilter::IRSingleSpeedFromPositionFilter(float factor)
+    : mFactor(factor)
+{
+}
+
+bool IRSingleSpeedFromPositionFilter::update(base::Time time, base::JointState& state)
+{
+    if (!state.hasPosition())
+        throw std::runtime_error("IRSingleSpeedFromPositionFilter::update - no position in sample");
+
+    if (mLastUpdate.isNull())
+    {
+        mLastUpdate = time;
+        mLastState = state;
+        return false;
+    }
+
+    float current = (state.position - mLastState.position) / (time - mLastUpdate).toSeconds();
+    mLastUpdate = time;
+    if (mLastState.hasSpeed())
+    {
+        state.speed = mFactor * current + (1 - mFactor) * mLastState.speed;
+        mLastState = state;
+        return true;
+    }
+    else
+    {
+        mLastState = state;
+        mLastState.speed = current;
+        return false;
+    }
+}
+
+
 IRSpeedFromPositionFilter::IRSpeedFromPositionFilter(float factor, size_t size)
     : mFactor(factor)
 {
-    mLast.resize(size);
+    mFilters.resize(size, IRSingleSpeedFromPositionFilter(factor));
 }
 
 bool IRSpeedFromPositionFilter::update(base::samples::Joints& joints, bool force)
 {
-    if (mLast.time.isNull())
-    {
-        mLast = joints;
-        return false;
-    }
-    if (joints.states.size() != mLast.states.size())
+    if (mFilters.empty())
+        mFilters.resize(joints.size(), IRSingleSpeedFromPositionFilter(mFactor));
+    else if (joints.states.size() != mFilters.size())
         throw std::runtime_error("IRSpeedFromPositionFilter::update - the number of states in the sample changed");
 
     size_t size = joints.states.size();
@@ -24,21 +55,10 @@ bool IRSpeedFromPositionFilter::update(base::samples::Joints& joints, bool force
     {
         if (joints.states[i].hasSpeed() && !force)
             continue;
-        if (!joints.states[i].hasPosition())
-            throw std::runtime_error("IRSpeedFromPositionFilter::update - no position in sample");
-
-        float current = (joints.states[i].position - mLast.states[i].position) / (joints.time.toSeconds() - mLast.time.toSeconds());
-        if (mLast.states[i].hasSpeed())
-            joints.states[i].speed = mFactor * current + (1 - mFactor) * mLast.states[i].speed;
-        else
-        {
+        if (!mFilters[i].update(joints.time, joints.states[i]))
             hasResult = false;
-            joints.states[i].speed = current;
-        }
     }
 
-    mLast = joints;
     return hasResult;
 }
-
 

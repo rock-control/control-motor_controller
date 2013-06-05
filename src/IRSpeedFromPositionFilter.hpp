@@ -5,6 +5,17 @@
 
 namespace motor_controller
 {
+    class IRSingleSpeedFromPositionFilter
+    {
+        float mFactor;
+        base::Time mLastUpdate;
+        base::JointState mLastState;
+
+    public:
+        IRSingleSpeedFromPositionFilter(float factor);
+        bool update(base::Time time, base::JointState& state);
+    };
+
     /** This simple class applies a IR filter on a JointState to estimate the
      * velocity. It will work only on the JointState objects that do not have
      * the velocity set
@@ -12,7 +23,7 @@ namespace motor_controller
     class IRSpeedFromPositionFilter
     {
         float mFactor;
-        base::samples::Joints mLast;
+        std::vector<IRSingleSpeedFromPositionFilter> mFilters;
 
     public:
         /**
