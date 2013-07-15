@@ -46,16 +46,16 @@ bool IRSpeedFromPositionFilter::update(base::samples::Joints& joints, bool force
 {
     if (mFilters.empty())
         mFilters.resize(joints.size(), IRSingleSpeedFromPositionFilter(mFactor));
-    else if (joints.states.size() != mFilters.size())
-        throw std::runtime_error("IRSpeedFromPositionFilter::update - the number of states in the sample changed");
+    else if (joints.elements.size() != mFilters.size())
+        throw std::runtime_error("IRSpeedFromPositionFilter::update - the number of elements in the sample changed");
 
-    size_t size = joints.states.size();
+    size_t size = joints.elements.size();
     bool hasResult = true;
     for (size_t i = 0; i < size; ++i)
     {
-        if (joints.states[i].hasSpeed() && !force)
+        if (joints.elements[i].hasSpeed() && !force)
             continue;
-        if (!mFilters[i].update(joints.time, joints.states[i]))
+        if (!mFilters[i].update(joints.time, joints.elements[i]))
             hasResult = false;
     }
 
