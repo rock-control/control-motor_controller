@@ -35,6 +35,17 @@ void PIDSettings::setParallelCoefficients(double _Kp, double _Ki, double _Kd)
     Td = _Kd / _Kp;
 }
 
+void ParallelPIDSettings::setIdealCoefficients(double _K, double _Ti, double _Td)
+{
+    Kp = _K;
+    if(_Ti != 0){
+        Ki = _K / _Ti;
+    } else{
+        Ki = 0;
+    }
+    Kd = _Td * _K;
+}
+
 PID::PID():
 initialized(false),prevValue(0),Bi(0),Ad(0),Bd(0),Ao(0),P(0),
 I(0),D(0),rawCommand(0),saturatedCommand(0),bIntegral(false),
@@ -42,6 +53,18 @@ bDerivative(false),bDerivativeFiltering(false),Kold(0),Bold(0),
 firstRun(true),bSaturated(false)
 { 
 };
+
+void PID::setParallelPIDSettings(const ParallelPIDSettings &_settings){
+    setParallelCoefficients(_settings.Ts,
+            _settings.Kp,
+            _settings.Ki,
+            _settings.Kd,
+            _settings.N,
+            _settings.B,
+            _settings.Tt,
+            _settings.YMin,
+            _settings.YMax);
+}
 
 	void 
 PID::setParallelCoefficients(double _Ts,
