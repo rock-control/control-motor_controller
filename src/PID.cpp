@@ -31,8 +31,18 @@ negativeZeroCrossing(double currValue, double prevValue, double refValue)
 void PIDSettings::setParallelCoefficients(double _Kp, double _Ki, double _Kd)
 {
     K  = _Kp;
-    Ti = _Kp / _Ki;
-    Td = _Kd / _Kp;
+    
+    if(_Ki != 0){
+        Ti = _Kp / _Ki;
+    } else {
+        Ti = 0;
+    }
+
+    if(_Kp != 0){
+        Td = _Kd / _Kp;
+    } else {
+        Ts = 0;
+    }
 }
 
 void ParallelPIDSettings::setIdealCoefficients(double _K, double _Ti, double _Td)
