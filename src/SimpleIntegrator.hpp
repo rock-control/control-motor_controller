@@ -18,8 +18,11 @@
 
 # include "RK4Integrator.hpp"
 
-#ifndef  SIMPLEINTEGRATOR_H__INC
-#define  SIMPLEINTEGRATOR_H__INC
+#ifndef  MOTOR_CONTROLLER_SIMPLEINTEGRATOR_H__INC
+#define  MOTOR_CONTROLLER_SIMPLEINTEGRATOR_H__INC
+
+namespace motor_controller
+{
 
 /*
  * =====================================================================================
@@ -47,4 +50,5 @@ class SimpleIntegrator : public RK4_SIM
     private:
 }; 
 
+}
 #endif 

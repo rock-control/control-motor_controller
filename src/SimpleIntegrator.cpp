@@ -17,6 +17,8 @@
  */
 #include "SimpleIntegrator.hpp"
 
+using namespace motor_controller;
+
 SimpleIntegrator::SimpleIntegrator() : RK4_SIM(1, 1)
 {}
 

@@ -22,6 +22,8 @@
 
 #include "RK4Integrator.hpp"
 
+using namespace motor_controller;
+
 /*************************************************************/
 
 RK4_SIM::RK4_SIM(int _plant_order, 

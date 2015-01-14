@@ -7,11 +7,14 @@
  *
  */
 
-#ifndef RK4_INTEGRATOR_HPP
-#define RK4_INTEGRATOR_HPP
+#ifndef MOTOR_CONTROLLER_RK4_INTEGRATOR_HPP
+#define MOTOR_CONTROLLER_RK4_INTEGRATOR_HPP
 
 #include <stdlib.h>
 #include <vector>
+
+namespace motor_controller
+{
 
 class RK4_SIM
 {
@@ -71,6 +74,8 @@ class RK4_SIM
 	inline void F3 (void);
 	inline void F4 (void);
 };
+
+}
 #endif
 
 
