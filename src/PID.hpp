@@ -181,6 +181,7 @@ namespace motor_controller
         bool initialized;
         double P, I, D;
         double input;
+        double reference;
         double rawOutput;
         double saturatedOutput;
     };
@@ -328,8 +329,11 @@ namespace motor_controller
 		//! true if coefficients initialized atleast once
 	    bool initialized;
 
-		//! Error from previous step  
+		//! measured value from previous step
 	    double prevValue;
+
+		//! reference value from previous step
+	    double prevReferenceValue;
 
 		//! Internal coefficients  
 	    double Bi, Ad, Bd, Ao; 

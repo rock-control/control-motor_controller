@@ -245,6 +245,7 @@ PID::update ( double _measuredValue, double _referenceValue, double time  )
     {
 	firstRun = false;
 	prevValue = _measuredValue;
+	prevReferenceValue = _referenceValue;
     }
 
     if( (Kold != gains.K || Bold != gains.B) && bIntegral)
@@ -264,6 +265,7 @@ PID::update ( double _measuredValue, double _referenceValue, double time  )
     rawCommand = P + I + D; // compute temporary output
     saturatedCommand = saturate(rawCommand); // Saturation
 
+    prevReferenceValue = _referenceValue;
     prevValue = _measuredValue; //update old process output
 
     
@@ -368,6 +370,7 @@ PID::getState() const
     state.I = I;
     state.D = D;
     state.input = prevValue;
+    state.reference = prevReferenceValue;
     state.rawOutput = rawCommand;
     state.saturatedOutput = saturatedCommand;
     return state;
