@@ -295,6 +295,9 @@ namespace motor_controller
 	    //! Enables the integral part of the controller with time constant \c _Ti
 	    void enableIntegral(double _Ti); 
 
+	    //! return if integral part is enabled 
+	    bool isIntegralEnabled() const { return bIntegral; }
+
 
 	    //! Diables the derivative part of the controller 
 	    void disableDerivative(); 
@@ -305,6 +308,9 @@ namespace motor_controller
 	    //! Enables the derivative part of the controller with time constant \c _Td 
 	    void enableDerivative(double _Td); 
 
+	    //! return if derivative part is enabled 
+	    bool isDerivativeEnabled() const { return bDerivative; }
+
 
 	    //! Diables the derivative filtering 
 	    void disableDerivativeFiltering(); 
@@ -314,6 +320,9 @@ namespace motor_controller
 
 	    //! Enables the derivative filtering with time constant \c _N
 	    void enableDerivativeFiltering(double _N)  ; 
+
+	    //! return if derivative filtering part is enabled 
+	    bool isDerivativeFilteringEnabled() const { return bDerivativeFiltering; }
 
         //! Returns true if the controller got saturated in the last run
         bool isSaturated();
