@@ -269,18 +269,6 @@ PID::update ( double _measuredValue, double _referenceValue, double time  )
     prevValue = _measuredValue; //update old process output
 
     
-/*    cout 
-	<< " t " << time 
-	<< ", y " << _measuredValue
-	<< ", ysp " << _referenceValue
-	<< ", err " << _referenceValue - _measuredValue
-	<< ", P " << P 
-	<< ", I " << I 
-	<< ", D " << D 
-	<< ", rC " << rawCommand 
-	<< ", sC " << saturatedCommand << endl;
-*/	
-
     return saturatedCommand;
 }
 
