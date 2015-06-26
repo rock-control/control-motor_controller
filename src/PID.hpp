@@ -338,8 +338,8 @@ namespace motor_controller
 		//! true if coefficients initialized atleast once
 	    bool initialized;
 
-		//! measured value from previous step
-	    double prevValue;
+		//! previous error value 
+	    double prevError;
 
 		//! reference value from previous step
 	    double prevReferenceValue;
