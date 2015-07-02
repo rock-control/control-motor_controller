@@ -186,6 +186,18 @@ namespace motor_controller
         double saturatedOutput;
     };
 
+    /** Representation of the derivative modes.
+     *
+     * Error: the derivative is applied to the error
+     * Output: the derivative is applied to the output only (avoid kicks due
+     * to setpoint changes)
+     */
+    enum DerivativeMode
+	{
+    	Error,
+		Output
+	};
+
 	/**
 	 * \brief PID Implementation in C++
 	 *
@@ -292,6 +304,9 @@ namespace motor_controller
 	    //! Enables the integral part of the controller 
 	    void enableIntegral(); 
 
+	    //! Returns whether integral part is enabled
+	    bool isIntegralEnabled() const { return bIntegral; }
+
 	    //! Enables the integral part of the controller with time constant \c _Ti
 	    void enableIntegral(double _Ti); 
 
@@ -301,6 +316,9 @@ namespace motor_controller
 
 	    //! Enables the derivative part of the controller 
 	    void enableDerivative(); 
+
+	    //! Returns whether derivative part is enabled
+	    bool isDerivativeEnabled() const { return bDerivative; }
 
 	    //! Enables the derivative part of the controller with time constant \c _Td 
 	    void enableDerivative(double _Td); 
@@ -313,7 +331,20 @@ namespace motor_controller
 	    void enableDerivativeFiltering(); 
 
 	    //! Enables the derivative filtering with time constant \c _N
-	    void enableDerivativeFiltering(double _N)  ; 
+	    void enableDerivativeFiltering(double _N);
+
+	    //! Returns whether derivative filtering part is enabled
+	    bool isDerivativeFilteringEnabled() const { return bDerivativeFiltering; }
+
+	    //! Sets the derivative mode
+	    /**
+	     * \param mode - Defines if the derivative will be applied to the
+	     * 				 error or only to the output
+	     */
+	    void setDerivativeMode(DerivativeMode mode);
+
+	    //! Returns the current derivative mode
+	    DerivativeMode getDerivativeMode() const;
 
         //! Returns true if the controller got saturated in the last run
         bool isSaturated();
@@ -332,6 +363,9 @@ namespace motor_controller
 		//! measured value from previous step
 	    double prevValue;
 
+		//! error from previous step
+	    double prevError;
+
 		//! reference value from previous step
 	    double prevReferenceValue;
 
@@ -346,6 +380,8 @@ namespace motor_controller
 	    bool bDerivative;
 		//! false turns off Derivative Filtering
 	    bool bDerivativeFiltering;
+	    //! Defines the derivative mode (error or output)
+	    DerivativeMode derivativeMode;
 
 		//! Bumpless parameter change- old value of K if parameter changed
 	    double Kold;
