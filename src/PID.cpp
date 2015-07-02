@@ -57,10 +57,10 @@ void ParallelPIDSettings::setIdealCoefficients(double _K, double _Ti, double _Td
 }
 
 PID::PID():
-initialized(false),prevError(0),Bi(0),Ad(0),Bd(0),Ao(0),P(0),
+initialized(false),prevValue(0),prevError(0),Bi(0),Ad(0),Bd(0),Ao(0),P(0),
 I(0),D(0),rawCommand(0),saturatedCommand(0),bIntegral(false),
 bDerivative(false),bDerivativeFiltering(false),Kold(0),Bold(0),
-firstRun(true),bSaturated(false)
+firstRun(true),bSaturated(false),derivativeMode(Error)
 { 
 };
 
@@ -244,6 +244,7 @@ PID::update ( double _measuredValue, double _referenceValue, double time  )
     if(firstRun)
     {
 	firstRun = false;
+	prevValue = _measuredValue;
 	prevReferenceValue = _referenceValue;
 	prevError = 0;
     }
@@ -262,12 +263,26 @@ PID::update ( double _measuredValue, double _referenceValue, double time  )
     P = gains.K*(gains.B*_referenceValue - _measuredValue); // Compute proportional part
     I = I + Bi*( error ) // Update integral part
 	  + Ao*(saturatedCommand-rawCommand); // Update integral anti-windup
-    D = Ad*D + Bd*( error - prevError ); // Compute derivative part
+
+    /**
+     * Applies the derivative action either to the error or only to
+     * the output
+     */
+    switch(derivativeMode)
+    {
+    case Error:
+    	D = Ad*D + Bd*( error - prevError );
+    	break;
+    case Output:
+    	D = Ad*D - Bd*(_measuredValue - prevValue);
+    	break;
+    }
 
     rawCommand = P + I + D; // compute temporary output
     saturatedCommand = saturate(rawCommand); // Saturation
 
     prevReferenceValue = _referenceValue;
+    prevValue = _measuredValue;
     prevError = error;
     
     return saturatedCommand;
@@ -358,7 +373,7 @@ PID::getState() const
     state.P = P;
     state.I = I;
     state.D = D;
-    state.input = prevReferenceValue - prevError;
+    state.input = prevValue;
     state.reference = prevReferenceValue;
     state.rawOutput = rawCommand;
     state.saturatedOutput = saturatedCommand;
