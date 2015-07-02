@@ -57,10 +57,10 @@ void ParallelPIDSettings::setIdealCoefficients(double _K, double _Ti, double _Td
 }
 
 PID::PID():
-initialized(false),prevValue(0),Bi(0),Ad(0),Bd(0),Ao(0),P(0),
+initialized(false),prevValue(0),prevError(0),Bi(0),Ad(0),Bd(0),Ao(0),P(0),
 I(0),D(0),rawCommand(0),saturatedCommand(0),bIntegral(false),
 bDerivative(false),bDerivativeFiltering(false),Kold(0),Bold(0),
-firstRun(true),bSaturated(false)
+firstRun(true),bSaturated(false), derivativeMode(Error)
 { 
 };
 
@@ -246,6 +246,7 @@ PID::update ( double _measuredValue, double _referenceValue, double time  )
 	firstRun = false;
 	prevValue = _measuredValue;
 	prevReferenceValue = _referenceValue;
+	prevError = 0;
     }
 
     if( (Kold != gains.K || Bold != gains.B) && bIntegral)
@@ -257,29 +258,32 @@ PID::update ( double _measuredValue, double _referenceValue, double time  )
 	Bold = gains.B;
     }
 
+    double error = _referenceValue - _measuredValue;
+
     P = gains.K*(gains.B*_referenceValue - _measuredValue); // Compute proportional part
-    I = I + Bi*(_referenceValue - _measuredValue) // Update integral part
+    I = I + Bi*(error) // Update integral part
 	  + Ao*(saturatedCommand-rawCommand); // Update integral anti-windup
-    D = Ad*D - Bd*(_measuredValue - prevValue); // Compute derivative part
+
+    /**
+     * Applies the derivative action either to the error or only to
+     * the output
+     */
+    switch(derivativeMode)
+    {
+    	case Error:
+    		D = Ad*D + Bd*( error - prevError );
+    		break;
+    	case Output:
+    		D = Ad*D - Bd*(_measuredValue - prevValue);
+    		break;
+    }
 
     rawCommand = P + I + D; // compute temporary output
     saturatedCommand = saturate(rawCommand); // Saturation
 
     prevReferenceValue = _referenceValue;
     prevValue = _measuredValue; //update old process output
-
-    
-/*    cout 
-	<< " t " << time 
-	<< ", y " << _measuredValue
-	<< ", ysp " << _referenceValue
-	<< ", err " << _referenceValue - _measuredValue
-	<< ", P " << P 
-	<< ", I " << I 
-	<< ", D " << D 
-	<< ", rC " << rawCommand 
-	<< ", sC " << saturatedCommand << endl;
-*/	
+    prevError = error;
 
     return saturatedCommand;
 }
@@ -354,6 +358,18 @@ PID::enableDerivativeFiltering(double _N)
     gains.N = _N; 
     enableDerivativeFiltering();
 } 
+
+	void
+PID::setDerivativeMode(DerivativeMode mode)
+{
+	derivativeMode = mode;
+}
+
+	DerivativeMode
+PID::getDerivativeMode() const
+{
+	return derivativeMode;
+}
 
         bool
 PID::isSaturated()
