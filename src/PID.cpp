@@ -60,7 +60,7 @@ PID::PID():
 initialized(false),prevValue(0),prevError(0),Bi(0),Ad(0),Bd(0),Ao(0),P(0),
 I(0),D(0),rawCommand(0),saturatedCommand(0),bIntegral(false),
 bDerivative(false),bDerivativeFiltering(false),Kold(0),Bold(0),
-firstRun(true),bSaturated(false),derivativeMode(Error)
+firstRun(true),bSaturated(false),derivativeMode(Output)
 { 
 };
 
