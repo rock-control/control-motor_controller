@@ -359,6 +359,18 @@ PID::enableDerivativeFiltering(double _N)
     enableDerivativeFiltering();
 } 
 
+    void 
+PID::setDerivativeMode(DerivativeMode mode)
+{
+    derivativeMode = mode;
+}
+
+    DerivativeMode 
+PID::getDerivativeMode() const
+{
+    return derivativeMode;
+}
+
         bool
 PID::isSaturated()
 {
