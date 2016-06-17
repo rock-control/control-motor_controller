@@ -15,7 +15,7 @@
 #include <iostream>
 #include <iomanip>
 #include <vector>
-#include <base/time.h>
+#include <base/Time.hpp>
 
 //! Detects zero crossing.
 bool zeroCrossing(double currValue, double prevValue, double refValue = 0);
