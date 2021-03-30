@@ -3,7 +3,7 @@
 using namespace motor_controller;
 using namespace std;
 
-	bool 
+	bool
 zeroCrossing(double currValue, double prevValue, double refValue)
 {
     if(positiveZeroCrossing(currValue, prevValue, refValue) ||
@@ -12,7 +12,7 @@ zeroCrossing(double currValue, double prevValue, double refValue)
     return false;
 }
 
-	bool 
+	bool
 positiveZeroCrossing(double currValue, double prevValue, double refValue)
 {
     if(prevValue < refValue && currValue >= refValue)
@@ -20,7 +20,7 @@ positiveZeroCrossing(double currValue, double prevValue, double refValue)
     return false;
 }
 
-	bool 
+	bool
 negativeZeroCrossing(double currValue, double prevValue, double refValue)
 {
     if(prevValue > refValue && currValue <= refValue)
@@ -31,7 +31,7 @@ negativeZeroCrossing(double currValue, double prevValue, double refValue)
 void PIDSettings::setParallelCoefficients(double _Kp, double _Ki, double _Kd)
 {
     K  = _Kp;
-    
+
     if(_Ki != 0){
         Ti = _Kp / _Ki;
     } else {
@@ -76,7 +76,7 @@ derivativeMode(Output),
 Kold(0),Bold(0),
 firstRun(true),
 bSaturated(false)
-{ 
+{
 };
 
 void PID::setParallelPIDSettings(const ParallelPIDSettings &_settings){
@@ -91,15 +91,15 @@ void PID::setParallelPIDSettings(const ParallelPIDSettings &_settings){
             _settings.YMax);
 }
 
-	void 
+	void
 PID::setParallelCoefficients(double _Ts,
 	double _Kp,
 	double _Ki,
-	double _Kd, 
+	double _Kd,
 	double _N,
-	double _B, 
+	double _B,
 	double _Tt,
-	double _YMin, 
+	double _YMin,
 	double _YMax)
 {
     // Cheat, only convert the coefficients using PIDSettings and then call
@@ -110,7 +110,7 @@ PID::setParallelCoefficients(double _Ts,
 	    _N, _B, _Tt, _YMin, _YMax);
 }
 
-    void 
+    void
 PID::setPIDSettings(const PIDSettings &_settings)
 {
     if(initialized)
@@ -129,15 +129,15 @@ PID::setPIDSettings(const PIDSettings &_settings)
     computeCoefficients();
 }
 
-	void 
-PID::setIdealCoefficients (double _Ts, 
+	void
+PID::setIdealCoefficients (double _Ts,
 		    double _K,
-		    double _Ti, 
-		    double _Td, 
+		    double _Ti,
+		    double _Td,
 		    double _N,
-		    double _B, 
+		    double _B,
 		    double _Tt,
-		    double _YMin, 
+		    double _YMin,
 		    double _YMax)
 {
     PIDSettings new_settings;
@@ -167,15 +167,15 @@ PID::autoEnableModes()
 	bDerivative = true;
 
     if(gains.N == 0.0)          // turns off derviative filtering
-	bDerivativeFiltering = false;	
+	bDerivativeFiltering = false;
     else
 	bDerivativeFiltering = true;
 }
 
-	double 
+	double
 PID::saturate ( double _val )
 {
-    if ( gains.YMax == 0.0 && gains.YMin == 0.0 ) 
+    if ( gains.YMax == 0.0 && gains.YMin == 0.0 )
     {
         bSaturated = false;
 	return _val;
@@ -190,70 +190,70 @@ PID::saturate ( double _val )
         bSaturated = true;
 	return gains.YMin;
     }
-    else 
+    else
     {
         bSaturated = false;
 	return _val;
     }
 }
 
-	void 
+	void
 PID::computeCoefficients()
 {
     Bi = Ao = Ad = Bd = 0.0;
     if(bIntegral)
     {
-	Bi = gains.K*gains.Ts/gains.Ti; // integral gain
-	if(gains.Tt == 0 && gains.Td != 0.0) // if Tt is zero and Td nonzero take the ideal value
-	    gains.Tt = sqrt(gains.Ti*gains.Td);  // approximate ideal value
-	
-	if(gains.Tt > 0.0)
-	    Ao = gains.Ts/gains.Tt;  // anti-windup
-	else 
-	    Ao = 0.0;
+        Bi = gains.K*gains.Ts/gains.Ti; // integral gain
+        if(gains.Tt == 0 && gains.Td != 0.0) // if Tt is zero and Td nonzero take the ideal value
+            gains.Tt = sqrt(gains.Ti*gains.Td);  // approximate ideal value
+
+        if(gains.Tt > 0.0)
+            Ao = gains.Ts/gains.Tt;  // anti-windup
+        else
+            Ao = 0.0;
     }
 
     if(bDerivative)
     {
-	if(bDerivativeFiltering)
-	{
-	    Ad = gains.Td/(gains.Td+gains.N*gains.Ts);
-	    Bd = gains.K*gains.N*Ad; //derivative gain
-	}
-	else
-	{
-	    Bd = gains.K*gains.Td/gains.Ts; //derivative gain
-	}
+        if(bDerivativeFiltering)
+        {
+            Ad = gains.Td/(gains.Td+gains.N*gains.Ts);
+            Bd = gains.K*gains.N*Ad; //derivative gain
+        }
+        else
+        {
+            Bd = gains.K*gains.Td/gains.Ts; //derivative gain
+        }
     }
 
     reset();
     initialized = true;
 }
-    
+
     void
 PID::printCoefficients()
 {
     cout << "PID PARAMETERS" << endl;
     cout << " Ideal type parameters " << endl
-         << "   Kp = " << gains.K 
+         << "   Kp = " << gains.K
          << ",  Ti = " << gains.Ti
-         << ",  Td = " << gains.Td << endl; 
+         << ",  Td = " << gains.Td << endl;
 
-    cout << " Parallel type parameters " << endl; 
-    cout << "Kp = " << gains.K 
+    cout << " Parallel type parameters " << endl;
+    cout << "Kp = " << gains.K
          << ", Ki = " << 1.0 / gains.Ti / gains.K
          << ", Kd = " << gains.Td * gains.K << " >>> " ;
 
-    cout << " Anti-integrator windup gain = " << gains.Tt << endl; 
-    cout << " Derivative smoothing factor (N) = " << gains.N << endl; 
+    cout << " Anti-integrator windup gain = " << gains.Tt << endl;
+    cout << " Derivative smoothing factor (N) = " << gains.N << endl;
 
-    cout << " Internal terms " << endl 
-	 << "   Integral Gain = " << Bi 
-	 << ",  Anti-windup Gain = " << Ao 
+    cout << " Internal terms " << endl
+	 << "   Integral Gain = " << Bi
+	 << ",  Anti-windup Gain = " << Ao
 	 << ",  Derivative Gains = " << Ad << "," << Bd << endl << endl;
 }
 
-	double 
+	double
 PID::update ( double _measuredValue, double _referenceValue, double time  )
 {
     if(firstRun)
@@ -268,7 +268,7 @@ PID::update ( double _measuredValue, double _referenceValue, double time  )
     {
 	// for bumpless motion on parameter change
 	I = I + Kold*(Bold     * _referenceValue - _measuredValue)
-	      - gains.K   *(gains.B  * _referenceValue - _measuredValue); 
+	      - gains.K   *(gains.B  * _referenceValue - _measuredValue);
 	Kold = gains.K;
 	Bold = gains.B;
     }
@@ -299,7 +299,7 @@ PID::update ( double _measuredValue, double _referenceValue, double time  )
     prevReferenceValue = _referenceValue;
     prevValue = _measuredValue;
     prevError = error;
-    
+
     return saturatedCommand;
 }
 
@@ -311,76 +311,76 @@ PID::reset()
     saturatedCommand = rawCommand = 0.0;
 }
 
-	void 
-PID::disableIntegral() 
-{ 
-    bIntegral = false; 
-    computeCoefficients(); 
-}
-
-	void 
-PID::enableIntegral()  
-{ 
-    bIntegral = true; 
+	void
+PID::disableIntegral()
+{
+    bIntegral = false;
     computeCoefficients();
 }
 
-	void 
-PID::enableIntegral(double _Ti)  
-{ 
-    gains.Ti = _Ti; 
+	void
+PID::enableIntegral()
+{
+    bIntegral = true;
+    computeCoefficients();
+}
+
+	void
+PID::enableIntegral(double _Ti)
+{
+    gains.Ti = _Ti;
     enableIntegral();
-} 
+}
 
-	void 
-PID::disableDerivative() 
-{ 
-    bDerivative = false; 
+	void
+PID::disableDerivative()
+{
+    bDerivative = false;
     computeCoefficients();
 }
 
-	void 
-PID::enableDerivative()  
-{ 
-    bDerivative = true; 
+	void
+PID::enableDerivative()
+{
+    bDerivative = true;
     computeCoefficients();
 }
 
-	void 
-PID::enableDerivative(double _Td)  
-{ 
-    gains.Td = _Td; 
+	void
+PID::enableDerivative(double _Td)
+{
+    gains.Td = _Td;
     enableDerivative();
-} 
+}
 
-	void 
-PID::disableDerivativeFiltering() 
-{ 
-    bDerivativeFiltering = false; 
+	void
+PID::disableDerivativeFiltering()
+{
+    bDerivativeFiltering = false;
     computeCoefficients();
 }
 
-	void 
-PID::enableDerivativeFiltering()  
-{ 
-    bDerivativeFiltering = true; 
+	void
+PID::enableDerivativeFiltering()
+{
+    bDerivativeFiltering = true;
     computeCoefficients();
-} 
+}
 
-	void 
-PID::enableDerivativeFiltering(double _N)  
-{ 
-    gains.N = _N; 
+	void
+PID::enableDerivativeFiltering(double _N)
+{
+    gains.N = _N;
     enableDerivativeFiltering();
-} 
+}
 
-    void 
+    void
 PID::setDerivativeMode(DerivativeMode mode)
 {
     derivativeMode = mode;
 }
 
-    DerivativeMode 
+    DerivativeMode
 PID::getDerivativeMode() const
 {
     return derivativeMode;
@@ -428,7 +428,7 @@ PIDAutoTuning::PIDAutoTuning(double _Ts,
     setCoefficients(_Ts, _stepRef, _inputAmplitude, _testTimeSec);
 }
 
-	void 
+	void
 PIDAutoTuning::setCoefficients(double _Ts,
 	double _stepRef,
 	double _inputAmplitude,
@@ -436,11 +436,11 @@ PIDAutoTuning::setCoefficients(double _Ts,
 {
     Ts = _Ts;
     inputAmplitude = _inputAmplitude;
-    testTimeSec = _testTimeSec; 
+    testTimeSec = _testTimeSec;
     stepRef = _stepRef;
 }
 
-	double 
+	double
 PIDAutoTuning::update(double _measuredValue)
 {
     if(firstRun)
@@ -459,12 +459,12 @@ PIDAutoTuning::update(double _measuredValue)
     {
 	if(error  > maxAmplitude)
 	{
-		cout << " maxAmp " << maxAmplitude << endl; 
+		cout << " maxAmp " << maxAmplitude << endl;
 		maxAmplitude = error;
 	}
 	else if(error < minAmplitude)
 	{
-		cout << " minAmp " << minAmplitude << endl; 
+		cout << " minAmp " << minAmplitude << endl;
 		minAmplitude = error;
 	}
     }
@@ -474,9 +474,9 @@ PIDAutoTuning::update(double _measuredValue)
     {
 	firstZeroCrossing = true;
 	outputTimePeriodSec = 2.0*(deltaOutputTime + Ts);
-	cout << " Zero crossing " << currTime 
-	     << " delta time " << deltaOutputTime 
-	     << " outputTimePeriodSec " << outputTimePeriodSec << endl; 
+	cout << " Zero crossing " << currTime
+	     << " delta time " << deltaOutputTime
+	     << " outputTimePeriodSec " << outputTimePeriodSec << endl;
 	deltaOutputTime = 0.0;
     }
     else
@@ -485,36 +485,36 @@ PIDAutoTuning::update(double _measuredValue)
 
     // Stops after test time period
     currTime += Ts;
-    if(currTime <= testTimeSec) 
+    if(currTime <= testTimeSec)
     {
 	if( error != 0.0 )
-	    return ((error) / fabs(error)) * inputAmplitude; 
-	else 
+	    return ((error) / fabs(error)) * inputAmplitude;
+	else
 	    return inputAmplitude;
     }
-    else 
+    else
     {
 	// computes the control system parameters
 	outputAmplitude = (maxAmplitude - minAmplitude) / 2.0;
-	ultimateGain = 4.0*fabs(inputAmplitude) / M_PI / outputAmplitude; 
+	ultimateGain = 4.0*fabs(inputAmplitude) / M_PI / outputAmplitude;
 	return 0.0;
     }
 }
 
-	void 
+	void
 PIDAutoTuning::getTunedP(double &_Kp)
 {
     _Kp = 0.5 * ultimateGain;
 }
 
-	void 
+	void
 PIDAutoTuning::getTunedPI(double &_Kp, double &_Ti)
 {
     _Kp = 0.45 * ultimateGain;
     _Ti = 1.2 / outputTimePeriodSec / _Kp;
 }
 
-	void 
+	void
 PIDAutoTuning::getTunedPID(double &_Kp, double &_Ti, double &_Td)
 {
     _Kp = 0.6 * ultimateGain;
@@ -522,11 +522,11 @@ PIDAutoTuning::getTunedPID(double &_Kp, double &_Ti, double &_Td)
     _Td = outputTimePeriodSec / 8.0 / _Kp;
 
     /*
-    cout << " Kcu " << ultimateGain 
-	 << " Tc " << outputTimePeriodSec 
+    cout << " Kcu " << ultimateGain
+	 << " Tc " << outputTimePeriodSec
          << " A " << 	outputAmplitude
-         << " Kp " << _Kp 
-	 << " Ti " << _Ti 
+         << " Kp " << _Kp
+	 << " Ti " << _Ti
 	 << " Td " << _Td << endl;
 	 */
 }
@@ -540,7 +540,7 @@ PIDStepResponseProperties::PIDStepResponseProperties(double _Ts,
     setCoefficients(_Ts, _riseTimeFractionReference, _settlingTimeFractionReference);
 }
 
-	void 
+	void
 PIDStepResponseProperties::setCoefficients(double _Ts,
 	double _riseTimeFractionReference,
 	double _settlingTimeFractionReference)
@@ -569,7 +569,7 @@ PIDStepResponseProperties::reset()
     maxAmplitude = 0.0;
 }
 
-	void 
+	void
 PIDStepResponseProperties::update(double _actualOutput,
 	double _refInput)
 {
@@ -583,11 +583,11 @@ PIDStepResponseProperties::update(double _actualOutput,
     currTime += Ts;
 
     // RISE TIME DETECTION
-    if(!riseTimeDetected 
+    if(!riseTimeDetected
 	    && positiveZeroCrossing(_actualOutput, prevOutput, riseTimeFractionReference * _refInput) )
     {
-	/*cout << " Rise Time Detected " 
-	     << _actualOutput << " " 
+	/*cout << " Rise Time Detected "
+	     << _actualOutput << " "
 	     << prevOutput << endl;
 	     */
 	riseTimeSec = currTime;
@@ -595,7 +595,7 @@ PIDStepResponseProperties::update(double _actualOutput,
     }
 
     // OVERSHOOT DETECTION
-    // stores the maximum amplitude after first zero crossing 
+    // stores the maximum amplitude after first zero crossing
     // and before the second zero crossing
     if(positiveZeroCrossing(_actualOutput, prevOutput, _refInput))
     {
@@ -603,7 +603,7 @@ PIDStepResponseProperties::update(double _actualOutput,
 	{
 	    firstZeroCrossing = true;
 	}
-	else 
+	else
 	{
 	    maxAmplitudes.push_back(maxAmplitude);
 	    maxAmplitude = 0.0;
@@ -625,15 +625,15 @@ PIDStepResponseProperties::update(double _actualOutput,
     steadyStateError = (_actualOutput - _refInput);
     if(prevOutput == _actualOutput)
 	steadyStateErrorTimeSec += Ts;
-    
+
     // SQUARED ERROR
-    squaredError += fabs(_actualOutput - _refInput) * 
+    squaredError += fabs(_actualOutput - _refInput) *
 	fabs(_actualOutput - _refInput);
 
     prevOutput = _actualOutput;
 }
 
-	void 
+	void
 PIDStepResponseProperties::getProperties(double &_riseTimeSec,
 		    double &_settlingTimeSec,
 		    double &_percentOvershoot,
@@ -642,10 +642,10 @@ PIDStepResponseProperties::getProperties(double &_riseTimeSec,
     _riseTimeSec = riseTimeSec;
     _settlingTimeSec = settlingTimeSec;
     _percentOvershoot = percentOvershoot;
-    _steadyStateError = steadyStateError; 
+    _steadyStateError = steadyStateError;
 }
 
-	void 
+	void
 PIDStepResponseProperties::printProperties()
 {
 /*    cout << "\nSTEP RESPONSE PROPERTIES " << endl;
@@ -653,23 +653,23 @@ PIDStepResponseProperties::printProperties()
     cout << "Total time: " << currTime  << "s" << endl;
     if(!riseTimeDetected)
 	cout << " Output did not reach the rise time target !!!" << endl;
-    else 
+    else
 	cout << "Rise time: " << riseTimeSec << "s" << endl;
 
     if(!firstZeroCrossing)
 	cout << " Output did not reach the target !!!" << endl;
     else
     {
-	cout << "Percentage overshoot: " << percentOvershoot << "%" << endl;  
+	cout << "Percentage overshoot: " << percentOvershoot << "%" << endl;
 	cout << "Amplitudes: " ;
 	for(std::vector<double>::iterator i = maxAmplitudes.begin(); i < maxAmplitudes.end(); i++)
 	    cout << "[" << *i << "]";
 	cout << endl;
     }
 
-    cout << "Settling time: " << settlingTimeSec << "s" << endl; 
-    cout << "Steady state error: " << steadyStateError 
-	 << " for the last "  << steadyStateErrorTimeSec << " seconds" << endl; 
+    cout << "Settling time: " << settlingTimeSec << "s" << endl;
+    cout << "Steady state error: " << steadyStateError
+	 << " for the last "  << steadyStateErrorTimeSec << " seconds" << endl;
 
     cout << "Squared error: " << squaredError << endl;
     cout << "<<<<<<<<<<<<<<<<<<<<<<<<<" << endl;
@@ -678,8 +678,8 @@ PIDStepResponseProperties::printProperties()
 	 << setw(10)
 	 << setprecision(5)
 	 << "Rt = " << riseTimeSec
-	 << ", Ov = " << percentOvershoot  
-	 << ", Ts = " << settlingTimeSec 
-	 << ", Ess = " << steadyStateError << endl; 
+	 << ", Ov = " << percentOvershoot
+	 << ", Ts = " << settlingTimeSec
+	 << ", Ess = " << steadyStateError << endl;
 }
 

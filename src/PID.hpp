@@ -1,8 +1,8 @@
 /**Collection of classes related to PID control.
  *
- * Implements classes for 
+ * Implements classes for
  * 	- PID
- * 	- PID auto-tuning 
+ * 	- PID auto-tuning
  * 	- extracting step response properties
  *
  * \author  Ajish Babu (ajish.babu@dfki.de)
@@ -28,32 +28,32 @@ bool negativeZeroCrossing(double currValue, double prevValue, double refValue = 
 
 namespace motor_controller
 {
-    //! Structure to hold the PID parameters for 'IDEAL' type PID. 
+    //! Structure to hold the PID parameters for 'IDEAL' type PID.
     /**
-	 * To convert from PARALLEL form to IDEAL form 
+	 * To convert from PARALLEL form to IDEAL form
 	 * 		Ti = 1.0/Ki/Kp and Td = Kd/Kp
 	 */
     struct PIDSettings
-    {   
+    {
 		//! Sampling time in seconds
 	    double Ts;
 
-		//! Proportional gain 
-	    double K; 
+		//! Proportional gain
+	    double K;
 
-		//! Integral time constant, 0 to disable it 
+		//! Integral time constant, 0 to disable it
 	    double Ti;
 
-		//! Derivative time constant, 0 to disable it 
+		//! Derivative time constant, 0 to disable it
 	    double Td;
 
 		//! Derivative term
-		/** Derivative term filtered by a first order system with time constant Td/N 
+		/** Derivative term filtered by a first order system with time constant Td/N
 		 * - Typical values of N are between 8 and 20
 		 * - No derivative action on frequencies above N/Td
 		 */
 	    double N;
-		     
+
 		//! Setpoint weighing term
 		/** Setpoint weighing term, generally between 0 and 1
 		 * - B = 0 reference is introduced only through integral term
@@ -62,24 +62,24 @@ namespace motor_controller
 	    double B;
 
 		//! Anti-integrator-windup
-		/** Anti-integrator-windup time constant 
+		/** Anti-integrator-windup time constant
 		 * - < 0 disable
-		 * - = 0 and Td = 0  disable 
+		 * - = 0 and Td = 0  disable
 		 * - = 0 and Td > 0  Tt = sqrt(Ti * Td)
 		 * */
-	    double Tt;		       
+	    double Tt;
 
 
-		//! Minimum output value 
+		//! Minimum output value
 	    double YMin;
-		//! Maximum output value 
+		//! Maximum output value
 	    double YMax;
 
 		//! Constructor
         PIDSettings():Ts(0),K(0),Ti(0),Td(0),N(0),B(1),Tt(-1),YMin(0),YMax(0){};
 
         bool operator==(const PIDSettings& other) const{
-            return 
+            return
                 Ts == other.Ts &&
                 K == other.K &&
                 Ti == other.Ti &&
@@ -100,15 +100,15 @@ namespace motor_controller
 		    double _Ki = 0,
 		    double _Kd = 0);
     };
-    
-    //! Structure to hold the PID parameters for 'PARALLEL' type PID. 
+
+    //! Structure to hold the PID parameters for 'PARALLEL' type PID.
     struct ParallelPIDSettings
-    {   
+    {
 		//! Sampling time in seconds
 	    double Ts;
 
-		//! Proportional gain 
-	    double Kp; 
+		//! Proportional gain
+	    double Kp;
 
 		//! Integral gain
 	    double Ki;
@@ -117,12 +117,12 @@ namespace motor_controller
 	    double Kd;
 
 		//! Derivative term
-		/** Derivative term filtered by a first order system with time constant Td/N 
+		/** Derivative term filtered by a first order system with time constant Td/N
 		 * - Typical values of N are between 8 and 20
 		 * - No derivative action on frequencies above N/Td
 		 */
 	    double N;
-		     
+
 		//! Setpoint weighing term
 		/** Setpoint weighing term, generally between 0 and 1
 		 * - B = 0 reference is introduced only through integral term
@@ -131,24 +131,24 @@ namespace motor_controller
 	    double B;
 
 		//! Anti-integrator-windup
-		/** Anti-integrator-windup time constant 
+		/** Anti-integrator-windup time constant
 		 * - < 0 disable
-		 * - = 0 and Td = 0  disable 
+		 * - = 0 and Td = 0  disable
 		 * - = 0 and Td > 0  Tt = sqrt(Ti * Td)
 		 * */
-	    double Tt;		       
+	    double Tt;
 
 
-		//! Minimum output value 
+		//! Minimum output value
 	    double YMin;
-		//! Maximum output value 
+		//! Maximum output value
 	    double YMax;
 
 		//! Constructor
         ParallelPIDSettings():Ts(0),Kp(0),Ki(0),Kd(0),N(0),B(1),Tt(-1),YMin(0),YMax(0){};
 
         bool operator==(const ParallelPIDSettings& other) const{
-            return 
+            return
                 Ts == other.Ts &&
                 Kp == other.Kp &&
                 Ki == other.Ki &&
@@ -201,10 +201,10 @@ namespace motor_controller
 	/**
 	 * \brief PID Implementation in C++
 	 *
-	 * \details 
-	 * Implementation based on "Control System Design" by Karl Johan Åström. 
-	 * implements 'IDEAL TYPE' PID with  
-	 *    -	anti-integrator windup 
+	 * \details
+	 * Implementation based on "Control System Design" by Karl Johan Åström.
+	 * implements 'IDEAL TYPE' PID with
+	 *    -	anti-integrator windup
 	 *    -	derivative filtering
 	 *    -	setpoint weighing
 	 *    -	bumpless parameter change
@@ -215,9 +215,9 @@ namespace motor_controller
 	 * where \f$u(t)\f$ is the controller output, \f$e(t)\f$ is the error and \f$y(t)\f$ is measured control variable.
 	 *
 	 * USAGE:
-	 *  - A simple PID usage is 
+	 *  - A simple PID usage is
 	 * 	  <code>
-     *    setParallelCoefficients(Ts, Kp, Ki, Kd) 
+     *    setParallelCoefficients(Ts, Kp, Ki, Kd)
 	 * 	  </code>
 	 * 	  which uses the parallel form of PID(as seen in most textbooks). In this case almost all the other features of the controller are disabled.
 	 *
@@ -242,17 +242,17 @@ namespace motor_controller
 		 * \param _Kp proportional gain
 		 * \param _Ki integral gain
 		 * \param _Kd derivative gain
-		 * 
+		 *
 		 * see \c PIDSettings for details of the rest of the parameters
 	     */
 	    void setParallelCoefficients(double _Ts,
 		    double _Kp = 0,
 		    double _Ki = 0,
-		    double _Kd = 0, 
+		    double _Kd = 0,
 		    double _N = 0,
-		    double _B = 1, 
+		    double _B = 1,
 		    double _Tt = -1,
-		    double _YMin = 0, 
+		    double _YMin = 0,
 		    double _YMax = 0);
 
 	    //! Sets the coefficients for a 'PARALLEL' type PID
@@ -267,18 +267,18 @@ namespace motor_controller
 		 * see \c PIDSettings for details of the rest of the parameters
 	     */
 	    void setIdealCoefficients (double _Ts,
-		    double _K = 0 , 
-		    double _Ti = 0, 
-		    double _Td = 0, 
+		    double _K = 0 ,
+		    double _Ti = 0,
+		    double _Td = 0,
 		    double _N = 0,
-		    double _B = 1, 
+		    double _B = 1,
 		    double _Tt = -1,
-		    double _YMin = 0, 
+		    double _YMin = 0,
 		    double _YMax = 0);
-	    //! Sets the coefficients for a 'PARALLEL' type PID using the \c struct \c ParallelPIDSettings 
+	    //! Sets the coefficients for a 'PARALLEL' type PID using the \c struct \c ParallelPIDSettings
         void setParallelPIDSettings(const ParallelPIDSettings &_settings);
-            
-	    //! Sets the coefficients for a 'IDEAL' type PID using the \c struct \c PIDSettings 
+
+	    //! Sets the coefficients for a 'IDEAL' type PID using the \c struct \c PIDSettings
         void setPIDSettings(const PIDSettings &_settings);
 
 	    //! Sets the saturation limit to +/- \c _val, disables if \c _val = 0.0
@@ -298,36 +298,36 @@ namespace motor_controller
 	    void printCoefficients();
 
 
-	    //! Diables the integral part of the controller 
-		void disableIntegral(); 
+	    //! Diables the integral part of the controller
+		void disableIntegral();
 
-	    //! Enables the integral part of the controller 
-	    void enableIntegral(); 
+	    //! Enables the integral part of the controller
+	    void enableIntegral();
 
 	    //! Enables the integral part of the controller with time constant \c _Ti
-	    void enableIntegral(double _Ti); 
+	    void enableIntegral(double _Ti);
 
 	    //! Returns whether integral part is enabled
 	    bool isIntegralEnabled() const { return bIntegral; }
 
 
-	    //! Diables the derivative part of the controller 
-	    void disableDerivative(); 
+	    //! Diables the derivative part of the controller
+	    void disableDerivative();
 
-	    //! Enables the derivative part of the controller 
-	    void enableDerivative(); 
+	    //! Enables the derivative part of the controller
+	    void enableDerivative();
 
-	    //! Enables the derivative part of the controller with time constant \c _Td 
-	    void enableDerivative(double _Td); 
+	    //! Enables the derivative part of the controller with time constant \c _Td
+	    void enableDerivative(double _Td);
 
 	    //! Returns whether derivative part is enabled
 	    bool isDerivativeEnabled() const { return bDerivative; }
 
-	    //! Diables the derivative filtering 
-	    void disableDerivativeFiltering(); 
+	    //! Diables the derivative filtering
+	    void disableDerivativeFiltering();
 
-	    //! Enables the derivative filtering 
-	    void enableDerivativeFiltering(); 
+	    //! Enables the derivative filtering
+	    void enableDerivativeFiltering();
 
 	    //! Enables the derivative filtering with time constant \c _N
 	    void enableDerivativeFiltering(double _N);
@@ -353,7 +353,7 @@ namespace motor_controller
 
 	private:
 
-		//! PID gains 
+		//! PID gains
 		struct PIDSettings gains;
 
 		//! true if coefficients initialized atleast once
@@ -362,15 +362,15 @@ namespace motor_controller
 	    //! measured value from previous step
 	    double prevValue;
 
-		//! previous error value 
+		//! previous error value
 	    double prevError;
 
 		//! reference value from previous step
 	    double prevReferenceValue;
 
-		//! Internal coefficients  
-	    double Bi, Ad, Bd, Ao; 
-		//! Internal variables  
+		//! Internal coefficients
+	    double Bi, Ad, Bd, Ao;
+		//! Internal variables
 	    double P, I, D, rawCommand, saturatedCommand;
 
 		//! false turns off Integral term
@@ -387,7 +387,7 @@ namespace motor_controller
 		//! Bumpless parameter change- old value of B if parameter changed
 	    double Bold;
 
-		//! true if first run 
+		//! true if first run
 	    bool firstRun;
 
             //! true if the controller is saturated
@@ -401,7 +401,7 @@ namespace motor_controller
         void autoEnableModes();
     };
 
-    //! PID auto tuning using Relay Feedback 
+    //! PID auto tuning using Relay Feedback
     class PIDAutoTuning
     {
 	public:
@@ -423,7 +423,7 @@ namespace motor_controller
 	    void getTunedPID(double &_Kp, double &_Ti, double &_Td); // Tuned values for interacting PID controller
 
 	private:
-	    double Ts; // Sampling time 
+	    double Ts; // Sampling time
 	    double testTimeSec; // Total time period of the test
 
 	    double stepRef; // Step reference input
@@ -449,11 +449,11 @@ namespace motor_controller
     };
 
     /** Extracts the step response properties
-	 * 
+	 *
 	 * Properties:
-     * 	- rise time, 
-     * 	- settling time, 
-     * 	- percentage overshoot 
+     * 	- rise time,
+     * 	- settling time,
+     * 	- percentage overshoot
      * 	- steady state error
      * 	- squared error
 	 */
@@ -487,13 +487,13 @@ namespace motor_controller
 	    double riseTimeSec;  // Rise time is seconds
 	    double settlingTimeSec; // Settling time in seconds
 	    double percentOvershoot; // Percentage Overshoot
-	    double steadyStateError; // Steady state error 
+	    double steadyStateError; // Steady state error
 	    double steadyStateErrorTimeSec;
 	    double squaredError;
 	    std::vector<double> maxAmplitudes;
 	    double maxAmplitude;
 
-	    double riseTimeFractionReference; // Measures the rise time to the fraction of reference value 
+	    double riseTimeFractionReference; // Measures the rise time to the fraction of reference value
 	    double settlingTimeFractionReference; // Measure the settling time limit within the fraction of reference value
 
 	    bool firstRun;
