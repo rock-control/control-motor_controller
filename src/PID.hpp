@@ -310,6 +310,12 @@ namespace motor_controller
 	    //! Returns whether integral part is enabled
 	    bool isIntegralEnabled() const { return bIntegral; }
 
+		//! Sets I to a new value
+		/**
+		 * \param new_integral_part - New integral part value
+		 */
+		void setAccumulatedIntegral(double new_integral_part);
+
 
 	    //! Diables the derivative part of the controller
 	    void disableDerivative();

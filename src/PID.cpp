@@ -332,6 +332,12 @@ PID::enableIntegral(double _Ti)
     enableIntegral();
 }
 
+    void
+PID::setAccumulatedIntegral(double new_integral_part)
+{
+    I = new_integral_part; 
+}
+
 	void
 PID::disableDerivative()
 {
@@ -406,7 +412,6 @@ PID::getState() const
     state.saturatedOutput = saturatedCommand;
     return state;
 }
-
 
 PIDAutoTuning::PIDAutoTuning()
 {
